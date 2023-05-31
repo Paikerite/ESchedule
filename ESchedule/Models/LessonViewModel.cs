@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ESchedule.Models
 {
@@ -13,10 +12,7 @@ namespace ESchedule.Models
         public DateTime BeginTime { get; set; }
         public DateTime EndTime { get; set; }
         public DateTime Created { get; set; }
-        public int NameClass { get; set; }
-        public int IdUserTeacher { get; set; }
-
-        [ForeignKey("IdUserTeacher")]
-        public UserViewModel UserTeacher { get; set; }
+        
+        public List<ClassViewModel> Classes { get; set; } = new();
     }
 }

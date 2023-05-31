@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ESchedule.Models
 {
-    public class UserViewModel
+    public class UserAccountViewModel
     {
         [Key]
         public int Id { get; set; }
@@ -15,9 +15,7 @@ namespace ESchedule.Models
         public string Role { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public int IdClass { get; set; }
 
-        [ForeignKey("IdClass")]
-        public ClassViewModel Class { get; set; }
+        public List<ClassViewModel> Classes { get; set; } = new();
     }
 }

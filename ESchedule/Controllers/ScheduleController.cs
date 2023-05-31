@@ -4,11 +4,11 @@ using System.Diagnostics;
 
 namespace ESchedule.Controllers
 {
-    public class HomeController : Controller
+    public class ScheduleController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<ScheduleController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public ScheduleController(ILogger<ScheduleController> logger)
         {
             _logger = logger;
         }
@@ -19,6 +19,11 @@ namespace ESchedule.Controllers
         }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        public IActionResult EditorLessons()
         {
             return View();
         }
