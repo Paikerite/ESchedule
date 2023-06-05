@@ -8,6 +8,16 @@ html {
   }
 }
 
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+th, td {
+    width: auto; /* «десь можно указать фиксированную ширину €чеек 100px */
+    word-wrap: break-word; /* –азрыв слов, если текст не помещаетс€ в €чейку */
+}
+
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
@@ -20,3 +30,67 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.date-calendar {
+    text-align: center;
+    margin-bottom: 5px;
+    padding: 4px;
+    background: #333;
+    color: #fff;
+    width: 25px;
+    border-radius: 20px;
+    flex: 0 0 auto;
+    align-self: flex-end;
+}
+
+.material-icons.md-18 {
+    font-size: 18px;
+}
+
+.material-icons.md-24 {
+    font-size: 24px;
+}
+
+.material-icons.md-36 {
+    font-size: 36px;
+}
+
+.material-icons.md-48 {
+    font-size: 48px;
+}
+
+.material-icons.md-dark {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.material-icons.md-dark.md-inactive {
+    color: rgba(0, 0, 0, 0.26);
+}
+
+.material-icons.md-light {
+    color: rgba(255, 255, 255, 1);
+}
+
+.material-icons.md-light.md-inactive {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/*.event-calendar {
+    flex: 0 0 auto;
+    font-size: 13px;
+    border-radius: 4px;
+    padding: 5px;
+    margin-bottom: 5px;
+    line-height: 14px;
+    background: #e4f2f2;
+    border: 1px solid #b5dbdc;
+    color: #009aaf;
+    text-decoration: none;
+}
+
+.event-desc-calendar {
+    color: #666;
+    margin: 3px 0 7px 0;
+    text-decoration: none;
+}*/
+

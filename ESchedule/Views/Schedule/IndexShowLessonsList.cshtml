@@ -1,0 +1,67 @@
+﻿@model IEnumerable<ESchedule.Models.LessonViewModel>
+
+@{
+    ViewData["Title"] = "Розклад";
+}
+
+<div class="container">
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-auto">
+                    <a class="btn btn-success" asp-action="Create">Запланувати урок</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-primary" asp-action="Index">Календар</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Назва уроку@*@Html.DisplayNameFor(model => model.NameLesson)*@
+                        </th>
+                        <th>
+                            Час проведення
+                        </th>
+                        <th>
+                            День проведення
+                        </th>
+                        <th>
+                            Додано@*@Html.DisplayNameFor(model => model.Created)*@
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.NameLesson)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.BeginTime) - @Html.DisplayFor(modelItem => item.EndTime)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.DayTime)
+                            </td>
+                            <th>
+                                @Html.DisplayFor(modelItem => item.Created)
+                            </th>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

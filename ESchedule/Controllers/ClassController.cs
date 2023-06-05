@@ -7,114 +7,90 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ESchedule.Data;
 using ESchedule.Models;
-using System.Globalization;
 
 namespace ESchedule.Controllers
 {
-    public class ScheduleController : Controller
+    public class ClassController : Controller
     {
         private readonly EScheduleDbContext _context;
 
-        public ScheduleController(EScheduleDbContext context)
+        public ClassController(EScheduleDbContext context)
         {
             _context = context;
         }
 
-        // GET: Schedule
+        // GET: Class
         public async Task<IActionResult> Index()
-        { 
-            var lessons = await _context.Lessons.OrderBy(a=>a.BeginTime.Hour).ToListAsync();
-
-            if (lessons != null)
-            {
-                return View(lessons);
-            }
-            else
-            {
-                return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
-            }
-        }
-
-        // GET: Schedule/IndexShowLessonsList
-        public async Task<IActionResult> IndexShowLessonsList()
         {
-            var lessons = await _context.Lessons.OrderByDescending(a => a.Created).ToListAsync();
-
-            if (lessons != null)
-            {
-                return View(lessons);
-            }
-            else
-            {
-                return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
-            }
+              return _context.Classes != null ? 
+                          View(await _context.Classes.ToListAsync()) :
+                          Problem("Entity set 'EScheduleDbContext.Classes'  is null.");
         }
 
-        // GET: Schedule/Details/5
+        // GET: Class/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Lessons == null)
+            if (id == null || _context.Classes == null)
             {
                 return NotFound();
             }
 
-            var lessonViewModel = await _context.Lessons
+            var classViewModel = await _context.Classes
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (lessonViewModel == null)
+            if (classViewModel == null)
             {
                 return NotFound();
             }
 
-            return View(lessonViewModel);
+            return View(classViewModel);
         }
 
-        // GET: Schedule/Create
+        // GET: Class/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Schedule/Create
+        // POST: Class/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,IdUserAdmin,CodeToJoin")] ClassViewModel classViewModel)
         {
             if (ModelState.IsValid)
             {
-                lessonViewModel.Created = DateTime.Now.Date;
-                _context.Add(lessonViewModel);
+                _context.Add(classViewModel);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(lessonViewModel);
+            return View(classViewModel);
         }
 
-        // GET: Schedule/Edit/5
+        // GET: Class/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Lessons == null)
+            if (id == null || _context.Classes == null)
             {
                 return NotFound();
             }
 
-            var lessonViewModel = await _context.Lessons.FindAsync(id);
-            if (lessonViewModel == null)
+            var classViewModel = await _context.Classes.FindAsync(id);
+            if (classViewModel == null)
             {
                 return NotFound();
             }
-            return View(lessonViewModel);
+            return View(classViewModel);
         }
 
-        // POST: Schedule/Edit/5
+        // POST: Class/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IdUserAdmin,CodeToJoin")] ClassViewModel classViewModel)
         {
-            if (id != lessonViewModel.Id)
+            if (id != classViewModel.Id)
             {
                 return NotFound();
             }
@@ -123,12 +99,12 @@ namespace ESchedule.Controllers
             {
                 try
                 {
-                    _context.Update(lessonViewModel);
+                    _context.Update(classViewModel);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LessonViewModelExists(lessonViewModel.Id))
+                    if (!ClassViewModelExists(classViewModel.Id))
                     {
                         return NotFound();
                     }
@@ -139,49 +115,49 @@ namespace ESchedule.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(lessonViewModel);
+            return View(classViewModel);
         }
 
-        // GET: Schedule/Delete/5
+        // GET: Class/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Lessons == null)
+            if (id == null || _context.Classes == null)
             {
                 return NotFound();
             }
 
-            var lessonViewModel = await _context.Lessons
+            var classViewModel = await _context.Classes
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (lessonViewModel == null)
+            if (classViewModel == null)
             {
                 return NotFound();
             }
 
-            return View(lessonViewModel);
+            return View(classViewModel);
         }
 
-        // POST: Schedule/Delete/5
+        // POST: Class/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Lessons == null)
+            if (_context.Classes == null)
             {
-                return Problem("Entity set 'EScheduleDbContext.Lessons'  is null.");
+                return Problem("Entity set 'EScheduleDbContext.Classes'  is null.");
             }
-            var lessonViewModel = await _context.Lessons.FindAsync(id);
-            if (lessonViewModel != null)
+            var classViewModel = await _context.Classes.FindAsync(id);
+            if (classViewModel != null)
             {
-                _context.Lessons.Remove(lessonViewModel);
+                _context.Classes.Remove(classViewModel);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool LessonViewModelExists(int id)
+        private bool ClassViewModelExists(int id)
         {
-          return (_context.Lessons?.Any(e => e.Id == id)).GetValueOrDefault();
+          return (_context.Classes?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

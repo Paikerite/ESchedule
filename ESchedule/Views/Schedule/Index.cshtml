@@ -1,48 +1,121 @@
-﻿@{
+﻿@using System.Globalization;
+@model IEnumerable<ESchedule.Models.LessonViewModel>
+
+@{
     ViewData["Title"] = "Розклад";
+
+    CultureInfo cultureUa = new CultureInfo("uk-UA");
+    DateTime currectDate = DateTime.Now;
+    int daysInMonth = DateTime.DaysInMonth(currectDate.Year, currectDate.Month);
+    DateTime firstDayOfMonth = new DateTime(currectDate.Year, currectDate.Month, 1);
+    int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+    //if (firstDayOfWeek == 0) // Воскресенье (Sunday)
+    //{
+    //    firstDayOfWeek = 7;
+    //}
+
+    string nameMonth = currectDate.ToString("MMMM", cultureUa);
+    int currectYear = currectDate.Year;
 }
 
-<div class="container">
-    <div class="card border-0 mb-2">
+<div class="container-fluid">
+    <div class="card mb-2 shadow-sm">
         <div class="card-body">
-            <div class="form-group col-md-3">
-                <label>Діапозон дат</label>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="text" />
-                    <button class="btn btn-outline-primary" type="submit">Пошук(іконку)</button>
-                </form>
+            <div class="row mb-2">
+                <div class="col">
+                    <div class="form-group col-md-3">
+                        <label class="mb-2">Місяць</label>
+                        <form class="d-flex" role="search">
+                            <input class="form-control me-2" type="date" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-auto">
+                    <a class="btn btn-success" asp-action="Create">Додати урок</a>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-primary" asp-action="IndexShowLessonsList">Список уроків</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="table-responsive text-center">
-        <table class="table table-striped table-hover table-bordered">
-            <tbody class="table-primary">
-                <tr><th class="headday">Пн</th><th class="headdate"><div>29.05.2023</div></th><th class="headdate"><div>05.06.2023</div></th><th class="headdate"><div>12.06.2023</div></th><th class="headdate"><div>19.06.2023</div></th><th class="headdate"><div>26.06.2023</div></th></tr>
-                <tr>
-                    <th class="headcol">
-                        <span class="lesson">3 пара</span>
-                        <span class="start">12:35</span>
-                        <span class="end">14:10</span>
-                    </th>
-                    <td>
-                        <div class="cell">
-                            <div class="lesson-20 ">
-                                <a class="btn-show-ads btn btn-secondary btn-sm" href="#" data-r1="954615" data-r2="29.05.2023">Оголошення</a>
-                                <div data-toggle="popover" title="" data-content="Комп'ютерно-інтегроване виробництво[КонсЭкз]<br>ауд. Дистанц<br>Сінж 2021-1<br>Комбаров Володимир Вікторович<br>Додано:  15.05.2023" data-original-title="29.05.2023 3 пара">
-                                    Комп-ІнтВир<strong>[КонсЭкз]</strong><br>
-                                    <strong>ауд. Дистанц</strong><br>
-                                    <i>Комбаров В.В.</i>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td><div class="cell">&nbsp;</div></td>
-                    <td><div class="cell">&nbsp;</div></td>
-                    <td><div class="cell">&nbsp;</div></td>
-                    <td><div class="cell">&nbsp;</div></td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="card shadow-sm">
+        <div class="card-body">
+@*            <div class="row mb-3">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary"><</button>
+                    <button type="button" class="btn btn-primary">></button>
+                </div>
+            </div>*@
+            <div class="row text-center mb-3">
+                <h3>@nameMonth @currectYear</h3>
+            </div>
+            <div class="table-responsive text-center">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Понеділок</th>
+                            <th scope="col">Вівторок</th>
+                            <th scope="col">Середа</th>
+                            <th scope="col">Четверг</th>
+                            <th scope="col">П'ятниця</th>
+                            <th scope="col">Субота</th>
+                            <th scope="col">Воскресіння</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @for (int ic = 1; ic < firstDayOfWeek; ic++)
+                            {
+                                <td>
+                                </td>
+                            }
+
+                            @for (int day = 1; day <= daysInMonth; day++)
+                            {
+                                <td>
+                                    <div class="position-relative mb-4">
+                                        <span class="position-absolute top-0 end-0 badge rounded-pill text-bg-secondary">@day</span>
+                                    </div>
+                                    @foreach (var item in Model)
+                                    {
+                                        if (item.DayTime.Day == day && item.DayTime.Month == currectDate.Month)
+                                        {
+                                            <div class="card mb-1" style="background-color: @item.ColorCard;">
+                                                <div class="card-body lh-sm p-0">
+                                                    <span class="fw-bold">@Html.DisplayFor(modelItem => item.BeginTime)-@Html.DisplayFor(modelItem => item.EndTime)</span>
+                                                    <span>
+                                                        @Html.DisplayFor(modelItem => item.NameLesson)
+                                                        <br />
+                                                        <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                                            <span class="material-icons">edit</span>
+                                                        </a>
+                                                        <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
+                                                            <span class="material-icons">info</span>
+                                                        </a>
+                                                        <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                                            <span class="material-icons">delete</span>
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </td>
+                                if ((firstDayOfWeek + day - 1) % 7 == 0)
+                                {
+                                <tr></tr>
+                                }
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
     </div>
+
 </div>
