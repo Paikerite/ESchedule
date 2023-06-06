@@ -9,31 +9,33 @@
     int daysInMonth = DateTime.DaysInMonth(currectDate.Year, currectDate.Month);
     DateTime firstDayOfMonth = new DateTime(currectDate.Year, currectDate.Month, 1);
     int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
-    //if (firstDayOfWeek == 0) // Воскресенье (Sunday)
-    //{
-    //    firstDayOfWeek = 7;
-    //}
+    if (firstDayOfWeek == 0) // Воскресенье (Sunday)
+    {
+        firstDayOfWeek = 7;
+    }
 
     string nameMonth = currectDate.ToString("MMMM", cultureUa);
     int currectYear = currectDate.Year;
+    string defaultValue = $"{currectYear}-{currectDate.Month.ToString().PadLeft(2, '0')}-{currectDate.Day.ToString().PadLeft(2, '0')}"; //this looks like 2023-05-23
 }
 
 <div class="container-fluid">
     <div class="card mb-2 shadow-sm">
         <div class="card-body">
             <div class="row mb-2">
-                <div class="col">
-                    <div class="form-group col-md-3">
-                        <label class="mb-2">Місяць</label>
-                        <form class="d-flex" role="search">
-                            <input class="form-control me-2" type="date" />
-                        </form>
-                    </div>
+                <div class="col-md-4">
+                    <label class="mb-2">Місяць та рік</label>
+                    <form id="datebyuserform" method="post"> @*asp-action="Calendar" *@
+                        <div class="hstack">
+                            <input class="form-control me-2" type="date" name="dateTimeByUser" value="@defaultValue" />
+                            <button type="submit" class="btn btn-outline-primary">Вибрати</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             <div class="row">
                 <div class="col-auto">
-                    <a class="btn btn-success" asp-action="Create">Додати урок</a>
+                    <a class="btn btn-success" asp-action="Create">Запланувати урок</a>
                 </div>
                 <div class="col-auto">
                     <a class="btn btn-primary" asp-action="IndexShowLessonsList">Список уроків</a>
@@ -42,80 +44,102 @@
         </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-@*            <div class="row mb-3">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary"><</button>
-                    <button type="button" class="btn btn-primary">></button>
+    
+    <div id="tableDataLessons">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <h3>@nameMonth @currectYear</h3>
                 </div>
-            </div>*@
-            <div class="row text-center mb-3">
-                <h3>@nameMonth @currectYear</h3>
-            </div>
-            <div class="table-responsive text-center">
-                <table class="table table-striped table-bordered">
-                    <thead>
-                        <tr>
-                            <th scope="col">Понеділок</th>
-                            <th scope="col">Вівторок</th>
-                            <th scope="col">Середа</th>
-                            <th scope="col">Четверг</th>
-                            <th scope="col">П'ятниця</th>
-                            <th scope="col">Субота</th>
-                            <th scope="col">Воскресіння</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            @for (int ic = 1; ic < firstDayOfWeek; ic++)
-                            {
-                                <td>
-                                </td>
-                            }
-
-                            @for (int day = 1; day <= daysInMonth; day++)
-                            {
-                                <td>
-                                    <div class="position-relative mb-4">
-                                        <span class="position-absolute top-0 end-0 badge rounded-pill text-bg-secondary">@day</span>
-                                    </div>
-                                    @foreach (var item in Model)
-                                    {
-                                        if (item.DayTime.Day == day && item.DayTime.Month == currectDate.Month)
-                                        {
-                                            <div class="card mb-1" style="background-color: @item.ColorCard;">
-                                                <div class="card-body lh-sm p-0">
-                                                    <span class="fw-bold">@Html.DisplayFor(modelItem => item.BeginTime)-@Html.DisplayFor(modelItem => item.EndTime)</span>
-                                                    <span>
-                                                        @Html.DisplayFor(modelItem => item.NameLesson)
-                                                        <br />
-                                                        <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
-                                                            <span class="material-icons">edit</span>
-                                                        </a>
-                                                        <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
-                                                            <span class="material-icons">info</span>
-                                                        </a>
-                                                        <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
-                                                            <span class="material-icons">delete</span>
-                                                        </a>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        }
-                                    }
-                                </td>
-                                if ((firstDayOfWeek + day - 1) % 7 == 0)
+                <div class="table-responsive text-center">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">Понеділок</th>
+                                <th scope="col">Вівторок</th>
+                                <th scope="col">Середа</th>
+                                <th scope="col">Четверг</th>
+                                <th scope="col">П'ятниця</th>
+                                <th scope="col">Субота</th>
+                                <th scope="col">Воскресіння</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @for (int ic = 1; ic < firstDayOfWeek; ic++)
                                 {
-                                <tr></tr>
+                                    <td>
+                                    </td>
                                 }
-                            }
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
 
+                                @for (int day = 1; day <= daysInMonth; day++)
+                                {
+                                    <td>
+                                        <div class="position-relative mb-4">
+                                            <span class="position-absolute top-0 end-0 badge rounded-pill text-bg-secondary">@day</span>
+                                        </div>
+                                        @foreach (var item in Model)
+                                        {
+                                            if (item.DayTime.Day == day && item.DayTime.Month == currectDate.Month)
+                                            {
+                                                <div class="card mb-1" style="background-color: @item.ColorCard;">
+                                                    <div class="card-body lh-sm p-0">
+                                                        <span class="fw-bold">@Html.DisplayFor(modelItem => item.BeginTime)-@Html.DisplayFor(modelItem => item.EndTime)</span>
+                                                        <span>
+                                                            @Html.DisplayFor(modelItem => item.NameLesson)
+                                                            <br />
+                                                            <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                                                <span class="material-icons">edit</span>
+                                                            </a>
+                                                            <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
+                                                                <span class="material-icons">info</span>
+                                                            </a>
+                                                            <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                                                <span class="material-icons">delete</span>
+                                                            </a>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+                                    if ((firstDayOfWeek + day - 1) % 7 == 0)
+                                    {
+                                    <tr></tr>
+                                    }
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
         </div>
     </div>
 
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            // При отправке формы выполнить асинхронный запрос и отобразить частичное представление
+            $("#datebyuserform").submit(function (event) {
+                event.preventDefault(); // Предотвращение обычного отправления формы
+
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: "@Url.Action("Calendar", "Schedule")",
+                    type: "POST",
+                    data: formData,
+                    success: function (result) {
+                        $("#tableDataLessons").html(result);
+                    },
+                    error: function () {
+                        alert("Error occurred while filtering data.");
+                    }
+                });
+            });
+        });
+    </script>
+
 </div>
+}

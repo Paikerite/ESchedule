@@ -22,8 +22,12 @@ namespace ESchedule.Controllers
 
         // GET: Schedule
         public async Task<IActionResult> Index()
-        { 
-            var lessons = await _context.Lessons.OrderBy(a=>a.BeginTime.Hour).ToListAsync();
+        {
+            var currectDate = DateTime.Now;
+            var lessons = await _context.Lessons
+                .Where(m=>m.DayTime.Month == currectDate.Month && m.DayTime.Year == currectDate.Year)
+                                                .OrderBy(a=>a.BeginTime.Hour)
+                                                .ToListAsync();
 
             if (lessons != null)
             {
@@ -38,11 +42,38 @@ namespace ESchedule.Controllers
         // GET: Schedule/IndexShowLessonsList
         public async Task<IActionResult> IndexShowLessonsList()
         {
-            var lessons = await _context.Lessons.OrderByDescending(a => a.Created).ToListAsync();
+            var lessons = await _context.Lessons
+                                .OrderByDescending(a => a.Created)
+                                .ToListAsync();
 
             if (lessons != null)
             {
                 return View(lessons);
+            }
+            else
+            {
+                return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
+            }
+        }
+
+        //POST: Schedule/Calendar
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Calendar(DateTime dateTimeByUser)
+        {
+            CultureInfo cultureUa = new CultureInfo("uk-UA");
+            ViewData["UserNameMonth"] = dateTimeByUser.ToString("MMMM", cultureUa);
+            ViewData["UserMonth"] = dateTimeByUser.Month;
+            ViewData["UserYear"] = dateTimeByUser.Year;
+
+            var lessons = await _context.Lessons
+                .Where(m => m.DayTime.Month == dateTimeByUser.Month && m.DayTime.Year == dateTimeByUser.Year)
+                                    .OrderBy(a => a.BeginTime.Hour)
+                                    .ToListAsync();
+
+            if (lessons != null)
+            {
+                return PartialView("_Calendar", lessons);
             }
             else
             {
