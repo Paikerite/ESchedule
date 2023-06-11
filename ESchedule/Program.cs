@@ -1,4 +1,6 @@
 ﻿using ESchedule.Data;
+using ESchedule.Services;
+using ESchedule.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 //using ESchedule.Controllers;
 
@@ -16,6 +18,14 @@ namespace ESchedule
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 
             builder.Services.AddEndpointsApiExplorer();
+
+            builder.Services.AddHttpClient();
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7087/")
+            });
+
+            builder.Services.AddScoped<ILessonService, LessonService>();
 
             builder.Services.AddSwaggerGen();
 

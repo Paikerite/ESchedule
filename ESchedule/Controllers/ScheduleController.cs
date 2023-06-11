@@ -8,26 +8,47 @@ using Microsoft.EntityFrameworkCore;
 using ESchedule.Data;
 using ESchedule.Models;
 using System.Globalization;
+using ESchedule.Services.Interfaces;
+using ESchedule.Services;
 
 namespace ESchedule.Controllers
 {
     public class ScheduleController : Controller
     {
         private readonly EScheduleDbContext _context;
+        private readonly ILessonService lessonService;
 
-        public ScheduleController(EScheduleDbContext context)
+        public ScheduleController(EScheduleDbContext context, ILessonService lessonService)
         {
             _context = context;
+            this.lessonService = lessonService;
         }
 
         // GET: Schedule
         public async Task<IActionResult> Index()
-        {
-            var currectDate = DateTime.Now;
-            var lessons = await _context.Lessons
-                .Where(m=>m.DayTime.Month == currectDate.Month && m.DayTime.Year == currectDate.Year)
-                                                .OrderBy(a=>a.BeginTime.Hour)
-                                                .ToListAsync();
+        {   
+            var currectDate = DateTime.Now; //Normal date
+
+            var lessons = await lessonService.GetLessonsByDate(currectDate);
+            ViewBag.Date = currectDate;
+
+            if (lessons != null)
+            {
+                return View(lessons);
+            }
+            else
+            {
+                return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
+            }
+        }
+
+        // POST: Schedule/{datebyuser}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(DateTime datebyuser)
+        {   
+            var lessons = await lessonService.GetLessonsByDate(datebyuser);
+            ViewBag.Date = datebyuser;
 
             if (lessons != null)
             {
@@ -42,9 +63,7 @@ namespace ESchedule.Controllers
         // GET: Schedule/IndexShowLessonsList
         public async Task<IActionResult> IndexShowLessonsList()
         {
-            var lessons = await _context.Lessons
-                                .OrderByDescending(a => a.Created)
-                                .ToListAsync();
+            var lessons = await lessonService.GetLessons();
 
             if (lessons != null)
             {
@@ -57,44 +76,34 @@ namespace ESchedule.Controllers
         }
 
         //POST: Schedule/Calendar
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Calendar(DateTime dateTimeByUser)
-        {
-            CultureInfo cultureUa = new CultureInfo("uk-UA");
-            ViewData["UserNameMonth"] = dateTimeByUser.ToString("MMMM", cultureUa);
-            ViewData["UserMonth"] = dateTimeByUser.Month;
-            ViewData["UserYear"] = dateTimeByUser.Year;
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Calendar(DateTime dateTimeByUser)
+        //{
+        //    CultureInfo cultureUa = new CultureInfo("uk-UA");
+        //    ViewData["UserNameMonth"] = dateTimeByUser.ToString("MMMM", cultureUa);
+        //    ViewData["UserMonth"] = dateTimeByUser.Month;
+        //    ViewData["UserYear"] = dateTimeByUser.Year;
 
-            var lessons = await _context.Lessons
-                .Where(m => m.DayTime.Month == dateTimeByUser.Month && m.DayTime.Year == dateTimeByUser.Year)
-                                    .OrderBy(a => a.BeginTime.Hour)
-                                    .ToListAsync();
+        //    var lessons = await _context.Lessons
+        //        .Where(m => m.DayTime.Month == dateTimeByUser.Month && m.DayTime.Year == dateTimeByUser.Year)
+        //                            .OrderBy(a => a.BeginTime.Hour)
+        //                            .ToListAsync();
 
-            if (lessons != null)
-            {
-                return PartialView("_Calendar", lessons);
-            }
-            else
-            {
-                return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
-            }
-        }
+        //    if (lessons != null)
+        //    {
+        //        return PartialView("_Calendar", lessons);
+        //    }
+        //    else
+        //    {
+        //        return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
+        //    }
+        //}
 
         // GET: Schedule/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int id)
         {
-            if (id == null || _context.Lessons == null)
-            {
-                return NotFound();
-            }
-
-            var lessonViewModel = await _context.Lessons
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (lessonViewModel == null)
-            {
-                return NotFound();
-            }
+            var lessonViewModel = await lessonService.GetLesson(id);
 
             return View(lessonViewModel);
         }
@@ -115,26 +124,16 @@ namespace ESchedule.Controllers
             if (ModelState.IsValid)
             {
                 lessonViewModel.Created = DateTime.Now.Date;
-                _context.Add(lessonViewModel);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                lessonViewModel = await lessonService.AddLesson(lessonViewModel);
             }
-            return View(lessonViewModel);
+            return RedirectToAction(nameof(IndexShowLessonsList));
         }
 
         // GET: Schedule/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null || _context.Lessons == null)
-            {
-                return NotFound();
-            }
-
-            var lessonViewModel = await _context.Lessons.FindAsync(id);
-            if (lessonViewModel == null)
-            {
-                return NotFound();
-            }
+            var lessonViewModel = await lessonService.GetLesson(id);
             return View(lessonViewModel);
         }
 
@@ -145,48 +144,16 @@ namespace ESchedule.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
         {
-            if (id != lessonViewModel.Id)
-            {
-                return NotFound();
-            }
+            lessonViewModel = await lessonService.UpdateLesson(id, lessonViewModel);
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(lessonViewModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!LessonViewModelExists(lessonViewModel.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(lessonViewModel);
+            //return View(lessonViewModel);
+            return RedirectToAction(nameof(IndexShowLessonsList));
         }
 
         // GET: Schedule/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || _context.Lessons == null)
-            {
-                return NotFound();
-            }
-
-            var lessonViewModel = await _context.Lessons
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (lessonViewModel == null)
-            {
-                return NotFound();
-            }
+            var lessonViewModel = await lessonService.GetLesson(id);
 
             return View(lessonViewModel);
         }
@@ -196,18 +163,9 @@ namespace ESchedule.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Lessons == null)
-            {
-                return Problem("Entity set 'EScheduleDbContext.Lessons'  is null.");
-            }
-            var lessonViewModel = await _context.Lessons.FindAsync(id);
-            if (lessonViewModel != null)
-            {
-                _context.Lessons.Remove(lessonViewModel);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            await lessonService.DeleteLesson(id);
+
+            return RedirectToAction(nameof(IndexShowLessonsList));
         }
 
         private bool LessonViewModelExists(int id)

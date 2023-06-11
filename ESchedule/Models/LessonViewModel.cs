@@ -7,8 +7,11 @@ namespace ESchedule.Models
         [Key]
         public int Id { get; set; }
 
+        [Required(AllowEmptyStrings = false, ErrorMessage ="Необхідна назва урока")]
         public string NameLesson { get; set; }
+
         public string DescriptionLesson { get; set; }
+
         [DataType(DataType.Time)]
         public DateTime BeginTime { get; set; }
         [DataType(DataType.Time)]

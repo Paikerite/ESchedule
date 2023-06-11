@@ -1,12 +1,47 @@
-﻿@model ESchedule.Models.LessonViewModel
+﻿@using System.Globalization;
+@model ESchedule.Models.LessonViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Деталь уроку";
+    CultureInfo cultureUa = new CultureInfo("uk-UA");
+    string nameOfWeek = Model.DayTime.ToString("ddd", cultureUa);
 }
 
-<h1>Деталі уроку</h1>
 
-<div>
+<div class="container">
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col text-center">
+                    <h2 class="fw-bold">@Html.DisplayFor(model => model.NameLesson)</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="card-text">
+                <p>@Html.DisplayFor(model => model.DescriptionLesson)</p>
+            </div>
+            <div class="card-text">
+                <h5 class="fw-bold">@nameOfWeek @Html.DisplayFor(model=>model.DayTime) @Html.DisplayFor(model => model.BeginTime)-@Html.DisplayFor(model => model.EndTime)</h5>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-primary" asp-action="Index">Повернутися до розкладу</a>
+                    <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model?.Id">Відредагувати</a>
+                </div>
+                <div class="col align-self-center text-end">
+                    <div class="text-body-secondary">Додано: @Html.DisplayFor(model => model.Created)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -38,4 +73,4 @@
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Відредагувати</a> |
     <a asp-action="Index">Повернутися до розкладу</a>
-</div>
+</div>*@

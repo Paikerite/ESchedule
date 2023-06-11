@@ -54,9 +54,15 @@
                                 @Html.DisplayFor(modelItem => item.Created)
                             </th>
                             <td>
-                                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                    <span class="material-icons">edit</span>
+                                </a>
+                                <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
+                                    <span class="material-icons">info</span>
+                                </a>
+                                <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                    <span class="material-icons">delete</span>
+                                </a>
                             </td>
                         </tr>
                     }

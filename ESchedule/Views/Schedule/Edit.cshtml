@@ -4,51 +4,64 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<h1>Редагування</h1>
 
-<h4>LessonViewModel</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="NameLesson" class="control-label"></label>
-                <input asp-for="NameLesson" class="form-control" />
-                <span asp-validation-for="NameLesson" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DescriptionLesson" class="control-label"></label>
-                <input asp-for="DescriptionLesson" class="form-control" />
-                <span asp-validation-for="DescriptionLesson" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="BeginTime" class="control-label"></label>
-                <input asp-for="BeginTime" class="form-control" />
-                <span asp-validation-for="BeginTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Created" class="control-label"></label>
-                <input asp-for="Created" class="form-control" />
-                <span asp-validation-for="Created" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Created" />
+                <div class="mb-3">
+                    <label asp-for="NameLesson" class="control-label">Назва уроку</label>
+                    <input asp-for="NameLesson" class="form-control" />
+                    <span asp-validation-for="NameLesson" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="DescriptionLesson" class="control-label">Опис уроку</label>
+                    <textarea asp-for="DescriptionLesson" class="form-control" ></textarea>
+                    <span asp-validation-for="DescriptionLesson" class="text-danger"></span>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label asp-for="DayTime" class="form-label">День</label>
+                        <input asp-for="DayTime" class="form-control" />
+                        <span asp-validation-for="DayTime" class="text-danger"></span>
+                    </div>
+                    <div class="col">
+                        <label asp-for="BeginTime" class="form-label">Початок уроку</label>
+                        <input asp-for="BeginTime" class="form-control" />
+                        <span asp-validation-for="BeginTime" class="text-danger"></span>
+                    </div>
+                    <div class="col">
+                        <label asp-for="EndTime" class="form-label">Кінець уроку</label>
+                        <input asp-for="EndTime" class="form-control" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ColorCard" class="form-label">Колір</label>
+                    <input type="color" asp-for="ColorCard" class="form-control form-control-color" />
+                    <span asp-validation-for="ColorCard" class="text-danger"></span>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-auto">
+                        <input type="submit" value="Опублікувати" class="btn btn-primary" />
+                    </div>
+                    <div class="col-auto">
+                        <a class="link-underline-light align-middle" asp-action="Index">
+                            <span class="material-icons md-18 align-middle">arrow_back</span>
+                            Повернутися до розкладу
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
-
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
