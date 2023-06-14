@@ -10,6 +10,7 @@ using ESchedule.Models;
 using System.Globalization;
 using ESchedule.Services.Interfaces;
 using ESchedule.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ESchedule.Controllers
 {

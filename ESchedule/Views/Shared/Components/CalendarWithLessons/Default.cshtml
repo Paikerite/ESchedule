@@ -7,6 +7,8 @@
 
     DateTime currectDate = (DateTime)ViewBag.Date;
 
+    int currectMonth = DateTime.Now.Month; //For checking. Not from user
+
     int daysInMonth = DateTime.DaysInMonth(currectDate.Year, currectDate.Month);
     DateTime firstDayOfMonth = new DateTime(currectDate.Year, currectDate.Month, 1);
     int firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
@@ -46,38 +48,73 @@
 
                         @for (int day = 1; day <= daysInMonth; day++)
                         {
-                            <td>
-                                <div class="position-relative mb-4">
-                                    <span class="position-absolute top-0 end-0 badge rounded-pill text-bg-secondary">@day</span>
-                                </div>
-                                @foreach (var item in Model)
-                                {
-                                    if (item.DayTime.Day == day && item.DayTime.Month == currectDate.Month)
+                            if (day == currectDate.Day && currectDate.Month == currectMonth) //For this checking, yea
+                            {
+                                <td class="table-secondary">
+                                    <div class="position-relative mb-4">
+                                        <span class="position-absolute top-0 end-0 badge rounded-pill text-bg-secondary">@day</span>
+                                    </div>
+                                    @foreach (var item in Model)
                                     {
-                                        <div class="card mb-1" style="background-color: @item.ColorCard;">
-                                            <div class="card-body lh-sm p-0">
-                                                <span class="fw-bold">@Html.DisplayFor(modelItem => item.BeginTime)-@Html.DisplayFor(modelItem => item.EndTime)</span>
-                                                <span>
-                                                    @Html.DisplayFor(modelItem => item.NameLesson)
-                                                    <br />
-                                                    <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
-                                                        <span class="material-icons">edit</span>
-                                                    </a>
-                                                    <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
-                                                        <span class="material-icons">info</span>
-                                                    </a>
-                                                    <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
-                                                        <span class="material-icons">delete</span>
-                                                    </a>
-                                                </span>
+                                        if (item.DayTime.Day == day && item.DayTime.Month == currectDate.Month)
+                                        {
+                                            <div class="card mb-1" style="background-color: @item.ColorCard;">
+                                                <div class="card-body lh-sm p-0">
+                                                    <span class="fw-bold">@Html.DisplayFor(modelItem => item.BeginTime)-@Html.DisplayFor(modelItem => item.EndTime)</span>
+                                                    <span>
+                                                        @Html.DisplayFor(modelItem => item.NameLesson)
+                                                        <br />
+                                                        <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                                            <span class="material-icons">edit</span>
+                                                        </a>
+                                                        <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
+                                                            <span class="material-icons">info</span>
+                                                        </a>
+                                                        <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                                            <span class="material-icons">delete</span>
+                                                        </a>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
+                                        }
                                     }
-                                }
-                            </td>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <div class="position-relative mb-4">
+                                        <span class="position-absolute top-0 end-0 badge rounded-pill text-bg-secondary">@day</span>
+                                    </div>
+                                    @foreach (var item in Model)
+                                    {
+                                        if (item.DayTime.Day == day && item.DayTime.Month == currectDate.Month)
+                                        {
+                                            <div class="card mb-1" style="background-color: @item.ColorCard;">
+                                                <div class="card-body lh-sm p-0">
+                                                    <span class="fw-bold">@Html.DisplayFor(modelItem => item.BeginTime)-@Html.DisplayFor(modelItem => item.EndTime)</span>
+                                                    <span>
+                                                        @Html.DisplayFor(modelItem => item.NameLesson)
+                                                        <br />
+                                                        <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                                            <span class="material-icons">edit</span>
+                                                        </a>
+                                                        <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
+                                                            <span class="material-icons">info</span>
+                                                        </a>
+                                                        <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                                            <span class="material-icons">delete</span>
+                                                        </a>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </td>
+                            }
                             if ((firstDayOfWeek + day - 1) % 7 == 0)
                             {
-                                <tr></tr>
+                            <tr></tr>
                             }
                         }
                     </tr>

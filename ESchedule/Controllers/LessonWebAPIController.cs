@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ESchedule.Data;
 using ESchedule.Models;
@@ -35,7 +30,6 @@ namespace ESchedule.Controllers
         }
 
         // GET: api/LessonWebAPI/2012-12-31
-        //[HttpGet("{date:datetime}")]
         [HttpGet("{date:datetime}")]
         public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByDate(DateTime date) //Bad Date
         {

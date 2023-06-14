@@ -21,7 +21,7 @@
                     <hr/>
                     <ul class="nav nav-pills flex-column mb-auto">
                         <li class="nav-item">
-                            <a asp-area="" asp-controller="Schedule" asp-action="Index" class="nav-link"> @* active aria-current="page"*@
+                            <a asp-area="" asp-controller="Schedule" asp-action="Index" class="nav-link link-body-emphasis"> @* active aria-current="page"*@
                                 <svg class="bi pe-none me-2" width="16" height="16"></svg>
                                 Розклад
                             </a>
@@ -32,21 +32,15 @@
                                 Клас
                             </a>
                         </li>
-@*                        <li>
-                            <a href="#" class="nav-link link-body-emphasis">
+                        <li>
+                            <a asp-area="" asp-controller="User" asp-action="TEST" class="nav-link link-body-emphasis">
                                 <svg class="bi pe-none me-2" width="16" height="16"></svg>
-                                Редактор розкладу 
+                                test
                             </a>
                         </li>
-                        <li>
-                            <a href="#" class="nav-link link-body-emphasis">
-                                <svg class="bi pe-none me-2" width="16" height="16"></svg>
-                                Журнал оцінок
-                            </a>
-                        </li>*@
                     </ul>
                     <hr />
-                    <div class="dropdown">
+@*                    <div class="dropdown">
                         <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
                             <strong>mdo</strong>
@@ -57,7 +51,13 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">Вийти</a></li>
                         </ul>
-                    </div>
+                    </div>*@
+                    <a asp-area="" asp-controller="User" asp-action="Login" class="d-flex align-items-center link-body-emphasis text-decoration-none" aria-expanded="false">
+                        Ввійти
+                    </a>
+                    <a asp-area="" asp-controller="User" asp-action="Logout" class="d-flex align-items-center link-body-emphasis text-decoration-none" aria-expanded="false">
+                        Виійти
+                    </a>
                 </div>
             </nav>
             <main role="main" class="pb-3 pt-3 col-md-9 ms-sm-auto col-lg-10 px-md-4">

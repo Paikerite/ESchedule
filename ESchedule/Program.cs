@@ -1,8 +1,10 @@
 ﻿using ESchedule.Data;
 using ESchedule.Services;
 using ESchedule.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-//using ESchedule.Controllers;
+using Newtonsoft.Json.Converters;
+using System.ComponentModel;
 
 namespace ESchedule
 {
@@ -14,6 +16,12 @@ namespace ESchedule
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+                //.AddJsonOptions(configure =>
+                //{
+                //    configure.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                //    configure.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonConverter());
+                //});
+
             builder.Services.AddDbContextPool<EScheduleDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 
@@ -26,6 +34,12 @@ namespace ESchedule
             });
 
             builder.Services.AddScoped<ILessonService, LessonService>();
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(option =>
+                {
+                    option.LoginPath = new PathString("/User/Login");
+                });
 
             builder.Services.AddSwaggerGen();
 
@@ -50,6 +64,7 @@ namespace ESchedule
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
