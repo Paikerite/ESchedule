@@ -20,27 +20,29 @@ namespace ESchedule.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessons()
         {
-          if (_context.Lessons == null)
-          {
-              return NotFound();
-          }
+            if (_context.Lessons == null)
+            {
+                return NotFound();
+            }
             return await _context.Lessons
                 .OrderByDescending(a => a.Created)
                 .ToListAsync();
         }
 
         // GET: api/LessonWebAPI/2012-12-31
-        [HttpGet("{date:datetime}")]
-        public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByDate(DateTime date) //Bad Date
+        //[HttpGet("{date:datetime}")]
+        [HttpGet("GetLessonsByDate/{date}")]
+        public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByDate(string date) //Bad Date
         {
-            var month = date.Day; //because date after transfer through http, date is backwarding, f.e day is month, month is day. idk
+            /*var month = date.Day;*/ //because date after transfer through http, date is backwarding, f.e day is month, month is day. idk
+            var ConvertedDate = DateTime.Parse(date);
             if (_context.Lessons == null)
             {
                 return NotFound();
             }
 
             return await _context.Lessons
-                .Where(m => m.DayTime.Month == month && m.DayTime.Year == date.Year)
+                .Where(m => m.DayTime.Month == ConvertedDate.Month && m.DayTime.Year == ConvertedDate.Year)
                 .OrderBy(a => a.BeginTime.Hour)
                 .ToListAsync();
         }

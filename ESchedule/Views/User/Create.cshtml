@@ -1,4 +1,5 @@
 ﻿@model ESchedule.Models.UserAccountViewModel
+@using ESchedule.Models.Enums
 
 @{
     ViewData["Title"] = "Create";
@@ -10,7 +11,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -32,19 +33,14 @@
                 <input asp-for="ProfilePicture" class="form-control" />
                 <span asp-validation-for="ProfilePicture" class="text-danger"></span>
             </div>
-@*            <div class="form-group">
-                <label asp-for="Role" class="control-label"></label>
-                <input asp-for="Role" class="form-control" />
-                <span asp-validation-for="Role" class="text-danger"></span>
-            </div>*@
             <h4 class="mb-3">Роль</h4>
             <div class="my-3">
                 <div class="form-check">
-                    <input asp-for="Role" id="student" name="RoleOfUser" type="radio" value="Student" class="form-check-input" />
+                    <input asp-for="Role" id="student" name="Role" type="radio" value="Student" checked class="form-check-input" />
                     <label class="form-check-label" for="student">Учень</label>
                 </div>
                 <div class="form-check">
-                    <input asp-for="Role" id="teacher" name="RoleOfUser" type="radio" value="Teacher" class="form-check-input" />
+                    <input asp-for="Role" id="teacher" name="Role" type="radio" value="Teacher" class="form-check-input" />
                     <label class="form-check-label" for="teacher">Вчитель</label>
                 </div>
             </div>

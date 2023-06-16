@@ -28,14 +28,17 @@
                     </form>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-auto">
-                    <a class="btn btn-success" asp-action="Create">Запланувати урок</a>
+            @if (User.IsInRole("Teacher"))
+            {
+                <div class="row">
+                    <div class="col-auto">
+                        <a class="btn btn-success" asp-action="Create">Запланувати урок</a>
+                    </div>
+                    <div class="col-auto">
+                        <a class="btn btn-primary" asp-action="IndexShowLessonsList">Список уроків</a>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <a class="btn btn-primary" asp-action="IndexShowLessonsList">Список уроків</a>
-                </div>
-            </div>
+            }
         </div>
     </div>
 

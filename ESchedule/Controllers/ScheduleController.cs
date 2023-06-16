@@ -62,6 +62,7 @@ namespace ESchedule.Controllers
         }
 
         // GET: Schedule/IndexShowLessonsList
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> IndexShowLessonsList()
         {
             var lessons = await lessonService.GetLessons();
@@ -110,6 +111,7 @@ namespace ESchedule.Controllers
         }
 
         // GET: Schedule/Create
+        [Authorize(Roles = "Teacher")]
         public IActionResult Create()
         {
             return View();
@@ -120,6 +122,7 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Create([Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
         {
             if (ModelState.IsValid)
@@ -132,6 +135,7 @@ namespace ESchedule.Controllers
         }
 
         // GET: Schedule/Edit/5
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Edit(int id)
         {
             var lessonViewModel = await lessonService.GetLesson(id);
@@ -143,6 +147,7 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
         {
             lessonViewModel = await lessonService.UpdateLesson(id, lessonViewModel);
@@ -152,6 +157,7 @@ namespace ESchedule.Controllers
         }
 
         // GET: Schedule/Delete/5
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Delete(int id)
         {
             var lessonViewModel = await lessonService.GetLesson(id);
@@ -162,6 +168,7 @@ namespace ESchedule.Controllers
         // POST: Schedule/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await lessonService.DeleteLesson(id);

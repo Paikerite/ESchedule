@@ -33,10 +33,21 @@
                 <input asp-for="ProfilePicture" class="form-control" />
                 <span asp-validation-for="ProfilePicture" class="text-danger"></span>
             </div>
-            <div class="form-group">
+@*            <div class="form-group">
                 <label asp-for="Role" class="control-label"></label>
                 <input asp-for="Role" class="form-control" />
                 <span asp-validation-for="Role" class="text-danger"></span>
+            </div>*@
+            <h4 class="mb-3">Роль</h4>
+            <div class="my-3">
+                <div class="form-check">
+                    <input asp-for="Role" id="student" name="Role" type="radio" value="Student" checked class="form-check-input" />
+                    <label class="form-check-label" for="student">Учень</label>
+                </div>
+                <div class="form-check">
+                    <input asp-for="Role" id="teacher" name="Role" type="radio" value="Teacher" class="form-check-input" />
+                    <label class="form-check-label" for="teacher">Вчитель</label>
+                </div>
             </div>
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>

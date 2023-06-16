@@ -28,7 +28,6 @@ namespace ESchedule.Models
         [DataType(DataType.Date)]
         public DateTime Created { get; set; }
 
-
         public string ColorCard { get; set; }
         
         public List<ClassViewModel> Classes { get; set; } = new();

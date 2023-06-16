@@ -1,6 +1,7 @@
 ﻿using ESchedule.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.InteropServices;
 
 namespace ESchedule.Models
 {
@@ -18,7 +19,7 @@ namespace ESchedule.Models
         [Required(ErrorMessage = "Не вказано прізвище по батькові")]
         public string PatronymicName { get; set; }
 
-        public string ProfilePicture { get; set; }
+        public string? ProfilePicture { get; set; }
 
         [Required(ErrorMessage = "Будь ласка, оберіть вашу роль в системі")]
         [EnumDataType(typeof(Roles), ErrorMessage = "Будь ласка, оберіть вашу роль в системі з переліку")]
@@ -28,6 +29,8 @@ namespace ESchedule.Models
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Не вказан пароль")]
+        [MinLength(6, ErrorMessage = "Мінімальна кількість символів - 6")]
+        [RegularExpression("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]+$", ErrorMessage = "Пароль не підходить, спробуйте інший")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 

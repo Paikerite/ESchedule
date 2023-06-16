@@ -12,12 +12,16 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using ESchedule.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace ESchedule.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly EScheduleDbContext _context;
+        //private readonly IEmailSender emailSender;
 
         public UserController(EScheduleDbContext context)
         {
@@ -25,12 +29,12 @@ namespace ESchedule.Controllers
         }
 
         // GET: User
-        public async Task<IActionResult> Index()
-        {
-              return _context.Users != null ? 
-                          View(await _context.Users.ToListAsync()) :
-                          Problem("Entity set 'EScheduleDbContext.Users'  is null.");
-        }
+        //public async Task<IActionResult> Index()
+        //{
+        //      return _context.Users != null ? 
+        //                  View(await _context.Users.ToListAsync()) :
+        //                  Problem("Entity set 'EScheduleDbContext.Users'  is null.");
+        //}
 
         // GET: User/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -51,21 +55,15 @@ namespace ESchedule.Controllers
         }
 
         // GET: User/Login
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
 
-        // GET: User/TEST
-        [Authorize]
-        public IActionResult TEST()
-        {
-            string t = $"{User.Identity.Name} and {User.Identity.IsAuthenticated}";
-            return Content(t);
-        }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([Bind("Email,Password")] LoginModel model)
         {
             if (ModelState.IsValid)
@@ -83,6 +81,7 @@ namespace ESchedule.Controllers
         }
 
         // GET: User/Create
+        [AllowAnonymous]
         public IActionResult Create()
         {
             return View();
@@ -93,6 +92,7 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
         {
             if (ModelState.IsValid)
@@ -160,7 +160,7 @@ namespace ESchedule.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
             }
             return View(userAccountViewModel);
         }
@@ -183,6 +183,12 @@ namespace ESchedule.Controllers
             return View(userAccountViewModel);
         }
 
+        //GET: User/NotHaveRights
+        public IActionResult NotHaveRights()
+        {
+            return View();
+        }
+
         // POST: User/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -199,7 +205,7 @@ namespace ESchedule.Controllers
             }
             
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
         }
 
         private bool UserAccountViewModelExists(int id)
@@ -207,6 +213,7 @@ namespace ESchedule.Controllers
             return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
+        [AllowAnonymous]
         private async Task Authenticate(string userName, Roles roles)
         {
             // создаем один claim

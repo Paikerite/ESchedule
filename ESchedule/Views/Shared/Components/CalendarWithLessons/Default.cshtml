@@ -64,15 +64,21 @@
                                                     <span>
                                                         @Html.DisplayFor(modelItem => item.NameLesson)
                                                         <br />
-                                                        <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
-                                                            <span class="material-icons">edit</span>
-                                                        </a>
+                                                        @if (User.IsInRole("Teacher"))
+                                                        {
+                                                            <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                                                <span class="material-icons">edit</span>
+                                                            </a>                 
+                                                        }
                                                         <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
                                                             <span class="material-icons">info</span>
                                                         </a>
-                                                        <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
-                                                            <span class="material-icons">delete</span>
-                                                        </a>
+                                                        @if (User.IsInRole("Teacher"))
+                                                        {
+                                                            <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                                                <span class="material-icons">delete</span>
+                                                            </a>                                                        
+                                                        }
                                                     </span>
                                                 </div>
                                             </div>
@@ -96,15 +102,21 @@
                                                     <span>
                                                         @Html.DisplayFor(modelItem => item.NameLesson)
                                                         <br />
-                                                        <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
-                                                            <span class="material-icons">edit</span>
-                                                        </a>
+                                                        @if (User.IsInRole("Teacher"))
+                                                        {
+                                                            <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                                                <span class="material-icons">edit</span>
+                                                            </a>
+                                                        }
                                                         <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">
                                                             <span class="material-icons">info</span>
                                                         </a>
-                                                        <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
-                                                            <span class="material-icons">delete</span>
-                                                        </a>
+                                                        @if (User.IsInRole("Teacher"))
+                                                        {
+                                                            <a class="link-underline-light" asp-action="Delete" asp-route-id="@item.Id">
+                                                                <span class="material-icons">delete</span>
+                                                            </a>
+                                                        }
                                                     </span>
                                                 </div>
                                             </div>

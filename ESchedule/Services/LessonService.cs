@@ -115,7 +115,7 @@ namespace ESchedule.Services
         {
             try
             {
-                var lessons = await this.httpClient.GetAsync($"api/LessonWebAPI/{date}");
+                var lessons = await this.httpClient.GetAsync($"api/LessonWebAPI/GetLessonsByDate/{date.ToString("u")}");
                 if (lessons.IsSuccessStatusCode)
                 {
                     if (lessons.StatusCode == System.Net.HttpStatusCode.NoContent)

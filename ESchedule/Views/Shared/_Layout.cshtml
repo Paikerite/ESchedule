@@ -1,4 +1,18 @@
-﻿<!DOCTYPE html>
+﻿@inject IAuthorizationService AuthorizationService
+@inject IUserService UserService
+
+@{
+    var isAuth = User.Identity.IsAuthenticated;
+
+    var currectUser = new UserAccountViewModel();
+
+    if (isAuth)
+    {
+        currectUser = await UserService.GetUserByEmail(User.Identity.Name);
+    }
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -32,32 +46,32 @@
                                 Клас
                             </a>
                         </li>
-                        <li>
-                            <a asp-area="" asp-controller="User" asp-action="TEST" class="nav-link link-body-emphasis">
-                                <svg class="bi pe-none me-2" width="16" height="16"></svg>
-                                test
-                            </a>
-                        </li>
                     </ul>
                     <hr />
-@*                    <div class="dropdown">
-                        <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
-                            <strong>mdo</strong>
-                        </a>
-                        <ul class="dropdown-menu text-small shadow">
-                            <li><a class="dropdown-item" href="#">Налаштування</a></li>
-                            <li><a class="dropdown-item" href="#">Профіль</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Вийти</a></li>
-                        </ul>
-                    </div>*@
-                    <a asp-area="" asp-controller="User" asp-action="Login" class="d-flex align-items-center link-body-emphasis text-decoration-none" aria-expanded="false">
-                        Ввійти
-                    </a>
-                    <a asp-area="" asp-controller="User" asp-action="Logout" class="d-flex align-items-center link-body-emphasis text-decoration-none" aria-expanded="false">
-                        Виійти
-                    </a>
+                    @if (isAuth)
+                    {
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="@currectUser.ProfilePicture" alt="" width="32" height="32" class="rounded-circle me-2">
+                                <strong>@currectUser.Name @currectUser.SurName</strong> 
+                            </a>
+                            <ul class="dropdown-menu text-small shadow">
+                                <li><a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Edit" asp-route-id="@currectUser.Id">Налаштування</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Details" asp-route-id="@currectUser.Id">Профіль</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Logout">Вийти</a></li>
+                            </ul>
+                        </div>
+@*                        <a asp-area="" asp-controller="User" asp-action="Logout" class="d-flex align-items-center link-body-emphasis text-decoration-none" aria-expanded="false">
+                            Вийти
+                        </a>*@
+                    }
+                    else
+                    {
+                        <a asp-area="" asp-controller="User" asp-action="Login" class="d-flex align-items-center link-body-emphasis text-decoration-none" aria-expanded="false">
+                            Ввійти
+                        </a>                
+                    }
                 </div>
             </nav>
             <main role="main" class="pb-3 pt-3 col-md-9 ms-sm-auto col-lg-10 px-md-4">
