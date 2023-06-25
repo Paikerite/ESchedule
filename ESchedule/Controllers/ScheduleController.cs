@@ -16,12 +16,10 @@ namespace ESchedule.Controllers
 {
     public class ScheduleController : Controller
     {
-        private readonly EScheduleDbContext _context;
         private readonly ILessonService lessonService;
 
-        public ScheduleController(EScheduleDbContext context, ILessonService lessonService)
+        public ScheduleController(ILessonService lessonService)
         {
-            _context = context;
             this.lessonService = lessonService;
         }
 
@@ -174,11 +172,6 @@ namespace ESchedule.Controllers
             await lessonService.DeleteLesson(id);
 
             return RedirectToAction(nameof(IndexShowLessonsList));
-        }
-
-        private bool LessonViewModelExists(int id)
-        {
-          return (_context.Lessons?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

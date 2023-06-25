@@ -1,53 +1,59 @@
 ﻿@model IEnumerable<ESchedule.Models.ClassViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Класи";
 }
 
-<h1>Index</h1>
+<div class="container-fluid">
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <form id="searchform" method="post">
+                        <div class="input-group mb-3">
+                            <input class="form-control" type="search" name="searchbyuser" placeholder="Пошук"/>
+                            <button type="submit" class="btn btn-outline-primary">Пошук</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-8">
+                    <a class="btn btn-primary" asp-action="JoinClass">Приєднатися до курсу</a>
+                </div>
+            </div>
+            @if (User.IsInRole("Teacher"))
+            {
+                <div class="row">
+                    <div class="col-auto">
+                        <a class="btn btn-success" asp-action="Create">Створити клас</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdUserAdmin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CodeToJoin)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdUserAdmin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CodeToJoin)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card">
+                    <a asp-action="Details" asp-route-id="@item.Id">
+                        <svg class="card-img-top" style="background-color:@item.PrimaryColor"/>
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a class="link-underline link-underline-opacity-0 link-body-emphasis" asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
+                        </h5>
+                        <p class="card-text">@item.Description</p>
+                        @if (User.IsInRole("Teacher"))
+                        {
+                            <div class="btn-group w-100" role="group" aria-label="Basic example">
+                                <a asp-action="Edit" class="btn btn-success" asp-route-id="@item.Id">Редагувати</a>
+                                <a asp-action="Delete" class="btn btn-danger" asp-route-id="@item.Id">Видалити</a>
+                            </div>                      
+                        }
+                    </div>
+                </div>
+            </div>  
+        }
+    </div>
+</div>

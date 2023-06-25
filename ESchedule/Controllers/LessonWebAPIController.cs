@@ -81,7 +81,7 @@ namespace ESchedule.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException e)
             {
                 if (!LessonViewModelExists(id))
                 {
@@ -89,7 +89,8 @@ namespace ESchedule.Controllers
                 }
                 else
                 {
-                    throw;
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                            $"Error retrieving data from the database: {e}");
                 }
             }
 
@@ -102,34 +103,51 @@ namespace ESchedule.Controllers
         [HttpPost]
         public async Task<ActionResult<LessonViewModel>> PostLessonViewModel(LessonViewModel lessonViewModel)
         {
-          if (_context.Lessons == null)
-          {
-              return Problem("Entity set 'EScheduleDbContext.Lessons'  is null.");
-          }
-            _context.Lessons.Add(lessonViewModel);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (_context.Lessons == null)
+                {
+                    return Problem("Entity set 'EScheduleDbContext.Lessons'  is null.");
+                }
+                _context.Lessons.Add(lessonViewModel);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLessonViewModel", new { id = lessonViewModel.Id }, lessonViewModel);
+                return CreatedAtAction("GetLessonViewModel", new { id = lessonViewModel.Id }, lessonViewModel);
+
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error updating data from the database: {e}");
+            }
         }
 
         // DELETE: api/LessonWebAPI/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLessonViewModel(int id)
         {
-            if (_context.Lessons == null)
+            try
             {
-                return NotFound();
+                if (_context.Lessons == null)
+                {
+                    return NotFound();
+                }
+                var lessonViewModel = await _context.Lessons.FindAsync(id);
+                if (lessonViewModel == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Lessons.Remove(lessonViewModel);
+                await _context.SaveChangesAsync();
+
+                return Ok(lessonViewModel);
             }
-            var lessonViewModel = await _context.Lessons.FindAsync(id);
-            if (lessonViewModel == null)
+            catch (Exception e)
             {
-                return NotFound();
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error updating data from the database: {e}");
             }
-
-            _context.Lessons.Remove(lessonViewModel);
-            await _context.SaveChangesAsync();
-
-            return Ok(lessonViewModel);
         }
 
         private bool LessonViewModelExists(int id)

@@ -33,6 +33,11 @@
                 <input asp-for="CodeToJoin" class="form-control" />
                 <span asp-validation-for="CodeToJoin" class="text-danger"></span>
             </div>
+            <div class="mb-3">
+                <label asp-for="PrimaryColor" class="form-label">Колір</label>
+                <input type="color" asp-for="PrimaryColor" class="form-control form-control-color" />
+                <span asp-validation-for="PrimaryColor" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

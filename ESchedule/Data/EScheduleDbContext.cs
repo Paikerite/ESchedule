@@ -13,6 +13,9 @@ namespace ESchedule.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            //modelBuilder.Entity<ClassViewModel>()
+            //    .HasMany(e => e.UsersAccount)
+            //    .WithMany(e => e.Classes);
         }
 
         public DbSet<ClassViewModel> Classes { get; set; } 
