@@ -1,7 +1,16 @@
 ﻿@model IEnumerable<ESchedule.Models.ClassViewModel>
+@inject IUserService userService
 
 @{
     ViewData["Title"] = "Класи";
+    var userName = User.Identity.Name;
+    int currectIdUser = -1;
+
+    if (userName != null)
+    {
+        var currectUser = await userService.GetUserByEmail(userName);
+        currectIdUser = currectUser.Id;
+    }
 }
 
 <div class="container-fluid">
@@ -44,7 +53,7 @@
                             <a class="link-underline link-underline-opacity-0 link-body-emphasis" asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
                         </h5>
                         <p class="card-text">@item.Description</p>
-                        @if (User.IsInRole("Teacher"))
+                        @if (User.IsInRole("Teacher") && item.IdUserAdmin == currectIdUser)
                         {
                             <div class="btn-group w-100" role="group" aria-label="Basic example">
                                 <a asp-action="Edit" class="btn btn-success" asp-route-id="@item.Id">Редагувати</a>

@@ -8,6 +8,6 @@ namespace ESchedule.Models
         [MinLength(6, ErrorMessage ="Мінімальна необхідна кількість символів - 6")]
         public string JoinCode { get; set; }
 
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
     }
 }

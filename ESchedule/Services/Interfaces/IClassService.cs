@@ -7,6 +7,7 @@ namespace ESchedule.Services.Interfaces
     {
         Task<IEnumerable<ClassViewModel>> GetClassesByUserName (string userName);
         Task<ClassViewModel> GetClassByCodeJoin(string codeToJoin);
+        Task<IEnumerable<ClassViewModel>> GetClassesByAdminId(int id);
         Task<ClassViewModel> AddUserToClassByCode(JoinClassModel joinClass);
         Task<ClassViewModel> GetClass(int id);
         Task<ClassViewModel> UpdateClass(int id, ClassViewModel classViewModel);

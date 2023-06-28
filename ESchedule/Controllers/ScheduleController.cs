@@ -1,31 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ESchedule.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using ESchedule.Models;
-using System.Globalization;
 using ESchedule.Services.Interfaces;
-using ESchedule.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ESchedule.Controllers
 {
     public class ScheduleController : Controller
     {
         private readonly ILessonService lessonService;
+        private readonly IClassService classService;
+        private readonly IUserService userService;
 
-        public ScheduleController(ILessonService lessonService)
+        public ScheduleController(ILessonService lessonService, IClassService classService, IUserService userService)
         {
             this.lessonService = lessonService;
+            this.classService = classService;
+            this.userService = userService;
         }
 
         // GET: Schedule
         public async Task<IActionResult> Index()
-        {   
+        {
             var currectDate = DateTime.Now; //Normal date
 
             var lessons = await lessonService.GetLessonsByDate(currectDate);
@@ -45,7 +41,7 @@ namespace ESchedule.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(DateTime datebyuser)
-        {   
+        {
             var lessons = await lessonService.GetLessonsByDate(datebyuser);
             ViewBag.Date = datebyuser;
 
@@ -75,31 +71,6 @@ namespace ESchedule.Controllers
             }
         }
 
-        //POST: Schedule/Calendar
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Calendar(DateTime dateTimeByUser)
-        //{
-        //    CultureInfo cultureUa = new CultureInfo("uk-UA");
-        //    ViewData["UserNameMonth"] = dateTimeByUser.ToString("MMMM", cultureUa);
-        //    ViewData["UserMonth"] = dateTimeByUser.Month;
-        //    ViewData["UserYear"] = dateTimeByUser.Year;
-
-        //    var lessons = await _context.Lessons
-        //        .Where(m => m.DayTime.Month == dateTimeByUser.Month && m.DayTime.Year == dateTimeByUser.Year)
-        //                            .OrderBy(a => a.BeginTime.Hour)
-        //                            .ToListAsync();
-
-        //    if (lessons != null)
-        //    {
-        //        return PartialView("_Calendar", lessons);
-        //    }
-        //    else
-        //    {
-        //        return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
-        //    }
-        //}
-
         // GET: Schedule/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -110,10 +81,29 @@ namespace ESchedule.Controllers
 
         // GET: Schedule/Create
         [Authorize(Roles = "Teacher")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            //LessonAddEditModel lessonModel = new() { DayTime = DateTime.Now };
+
+            var currectUser = await userService.GetUserByEmail(User.Identity.Name);
+            var availableClasses = await classService.GetClassesByAdminId(currectUser.Id);
+
+            var selectList = new SelectList(availableClasses, nameof(ClassViewModel.Id), nameof(ClassViewModel.Name));
+
+            var tuple = new Tuple<LessonViewModel, MultipleSelectModel>(new LessonViewModel() { DayTime=DateTime.Now, ColorCard = "#ffffff"}, new MultipleSelectModel() { SelectedClasses=selectList });
+
+            return View(tuple);
         }
+
+        // POST: Schedule/RemoveCourse/...
+        //[HttpPost]
+        //[Authorize(Roles = "Teacher")]
+        //public IActionResult RemoveCourse(LessonViewModel lessonViewModel, ClassViewModel classViewModel)
+        //{
+        //    lessonViewModel.Classes.Remove(classViewModel);
+
+        //    return View("Create",lessonViewModel);
+        //}
 
         // POST: Schedule/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -121,15 +111,35 @@ namespace ESchedule.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> Create([Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
+        public async Task<IActionResult> Create([Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,DayTime,Created,ColorCard,Classes")] LessonViewModel lessonModel,
+                                                [Bind("SelectedId, SelectedClasses")] MultipleSelectModel multipleSelectModel)
         {
             if (ModelState.IsValid)
             {
-                lessonViewModel.Created = DateTime.Now.Date;
+                //List<ClassViewModel> fullSelectedClasses = new();
 
-                lessonViewModel = await lessonService.AddLesson(lessonViewModel);
+                //foreach (var item in lessonModel.SelectedClasses)
+                //{
+                //    fullSelectedClasses.Add(await classService.GetClass(int.Parse(item.Value)));
+                //}
+
+                //LessonViewModel lessonViewModel = new()
+                //{
+                //    NameLesson = lessonModel.NameLesson,
+                //    DescriptionLesson = lessonModel.DescriptionLesson,
+                //    BeginTime = lessonModel.BeginTime,
+                //    EndTime = lessonModel.EndTime,
+                //    DayTime = lessonModel.DayTime,
+                //    Created = DateTime.Now,
+                //    ColorCard = lessonModel.ColorCard,
+                //    Classes=fullSelectedClasses
+                //};
+
+                await lessonService.AddLesson(lessonModel);
+
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(IndexShowLessonsList));
+            return View(lessonModel);
         }
 
         // GET: Schedule/Edit/5
@@ -148,10 +158,12 @@ namespace ESchedule.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,NameLesson,DescriptionLesson,BeginTime,EndTime,Created,DayTime,ColorCard")] LessonViewModel lessonViewModel)
         {
-            lessonViewModel = await lessonService.UpdateLesson(id, lessonViewModel);
-
-            //return View(lessonViewModel);
-            return RedirectToAction(nameof(IndexShowLessonsList));
+            if (ModelState.IsValid)
+            {
+                lessonViewModel = await lessonService.UpdateLesson(id, lessonViewModel);
+                return RedirectToAction(nameof(IndexShowLessonsList));
+            }
+            return View(lessonViewModel);
         }
 
         // GET: Schedule/Delete/5

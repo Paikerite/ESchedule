@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ESchedule.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace ESchedule.Models
 {
@@ -7,7 +8,7 @@ namespace ESchedule.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(AllowEmptyStrings = false, ErrorMessage ="Необхідна назва урока")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "Необхідна назва урока")]
         public string NameLesson { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Необхідний опис урока")]
@@ -29,7 +30,8 @@ namespace ESchedule.Models
         public DateTime Created { get; set; }
 
         public string ColorCard { get; set; }
-        
-        public List<ClassViewModel> Classes { get; set; } = new();
+
+        [CannotBeEmptyList(ErrorMessage = "Необхідно обрати курси, яким буде відображатися даний урок")]
+        public List<ClassViewModel> Classes { get; set; }
     }
 }

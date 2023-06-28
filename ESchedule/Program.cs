@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Converters;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace ESchedule
 {
@@ -17,10 +19,18 @@ namespace ESchedule
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
 
             builder.Services.AddDbContextPool<EScheduleDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"))
+                /*o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))*/);
+
+            //https://learn.microsoft.com/ru-ru/ef/core/querying/single-split-queries
 
             builder.Services.AddEndpointsApiExplorer();
 

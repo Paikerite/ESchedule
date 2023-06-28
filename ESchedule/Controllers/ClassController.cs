@@ -14,7 +14,7 @@ using ESchedule.Services.Interfaces;
 
 namespace ESchedule.Controllers
 {
-    [Authorize(Roles = "Teacher")]
+    [Authorize]
     public class ClassController : Controller
     {
         private readonly IClassService classService;
@@ -30,10 +30,6 @@ namespace ESchedule.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            //var classes = await _context.Classes
-            //        .Where(c => c.UsersAccount.Any(u => u.Email == currctUserName))
-            //        .Include(a => a.Lessons)
-            //        .ToListAsync();
             var classes = Enumerable.Empty<ClassViewModel>();
             var currctUserName = User.Identity.Name;
 
@@ -53,16 +49,9 @@ namespace ESchedule.Controllers
         }
 
         // GET: Class/Details/5
-        [AllowAnonymous]
+        [Authorize(Roles = "Student,Teacher")]
         public async Task<IActionResult> Details(int id)
         {
-            //if (id == null || _context.Classes == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //var classViewModel = await _context.Classes
-            //    .FirstOrDefaultAsync(m => m.Id == id);
             var classViewModel = await classService.GetClass(id);
             if (classViewModel == null)
             {
@@ -73,6 +62,7 @@ namespace ESchedule.Controllers
         }
 
         //GET: Class/JoinClass
+        [Authorize(Roles = "Student,Teacher")]
         public IActionResult JoinClass()
         {
             return View();
@@ -81,7 +71,8 @@ namespace ESchedule.Controllers
         //POST: Class/JoinClass
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> JoinClass([Bind("JoinCode, UserName")] JoinClassModel joinClass)
+        [Authorize(Roles = "Student,Teacher")]
+        public async Task<IActionResult> JoinClass([Bind("JoinCode")] JoinClassModel joinClass)
         {
             if (ModelState.IsValid)
             {
@@ -93,20 +84,19 @@ namespace ESchedule.Controllers
                     var currectUser = await userService.GetUserByEmail(joinClass.UserName);
                     if (!Class.UsersAccount.Contains(currectUser))
                     {
-                        //        Class.UsersAccount.Add(currectUser);
-                        //        await _context.SaveChangesAsync();
-                        //        return RedirectToAction(nameof(Index));
                         await classService.AddUserToClassByCode(joinClass);
+                        return RedirectToAction(nameof(Index));
                     }
                     else ModelState.AddModelError("", "Не вдалося записатися на курс. Ви вже приєднані до цього курсу");
                 }
                 else ModelState.AddModelError("", "Не вдалося записатися на курс. Перевірьте код");
 
-        }
+            }
             return View(joinClass);
         }
 
         // GET: Class/Create
+        [Authorize(Roles = "Teacher")]
         public IActionResult Create()
         {
             return View();
@@ -117,17 +107,13 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,IdUserAdmin,CodeToJoin,PrimaryColor")] ClassViewModel classViewModel)
         {
             if (ModelState.IsValid)
             {
-                //var currectUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == User.Identity.Name);
-                //classViewModel.UsersAccount.Add(currectUser);
-
-                //_context.Add(classViewModel);
-                //await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
                 var isExistClass = await classService.GetClassByCodeJoin(classViewModel.CodeToJoin);
+
                 if (isExistClass == null)
                 {
                     var JoinClass = new JoinClassModel() { JoinCode = classViewModel.CodeToJoin, UserName = User.Identity.Name };
@@ -148,18 +134,9 @@ namespace ESchedule.Controllers
         }
 
         // GET: Class/Edit/5
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Edit(int id)
         {
-            //if (id == null || _context.Classes == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //var classViewModel = await _context.Classes.FindAsync(id);
-            //if (classViewModel == null)
-            //{
-            //    return NotFound();
-            //}
             var classViewModel = await classService.GetClass(id);
 
             return View(classViewModel);
@@ -170,31 +147,11 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IdUserAdmin,CodeToJoin,PrimaryColor")] ClassViewModel classViewModel)
         {
-            //if (id != classViewModel.Id)
-            //{
-            //    return NotFound();
-            //}
-
             if (ModelState.IsValid)
             {
-                //try
-                //{
-                //    _context.Update(classViewModel);
-                //    await _context.SaveChangesAsync();
-                //}
-                //catch (DbUpdateConcurrencyException)
-                //{
-                //    if (!ClassViewModelExists(classViewModel.Id))
-                //    {
-                //        return NotFound();
-                //    }
-                //    else
-                //    {
-                //        throw;
-                //    }
-                //}
                 await classService.UpdateClass(id, classViewModel);
 
                 return RedirectToAction(nameof(Index));
@@ -203,19 +160,9 @@ namespace ESchedule.Controllers
         }
 
         // GET: Class/Delete/5
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> Delete(int id)
         {
-            //if (id == null || _context.Classes == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //var classViewModel = await _context.Classes
-            //    .FirstOrDefaultAsync(m => m.Id == id);
-            //if (classViewModel == null)
-            //{
-            //    return NotFound();
-            //}
             var classViewModel = await classService.GetClass(id);
 
             return View(classViewModel);
@@ -224,27 +171,12 @@ namespace ESchedule.Controllers
         // POST: Class/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            //if (_context.Classes == null)
-            //{
-            //    return Problem("Entity set 'EScheduleDbContext.Classes'  is null.");
-            //}
-            //var classViewModel = await _context.Classes.FindAsync(id);
-            //if (classViewModel != null)
-            //{
-            //    _context.Classes.Remove(classViewModel);
-            //}
-            
-            //await _context.SaveChangesAsync();
             await classService.DeleteClass(id);
 
             return RedirectToAction(nameof(Index));
         }
-
-        //private bool ClassViewModelExists(int id)
-        //{
-        //  return (_context.Classes?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
     }
 }

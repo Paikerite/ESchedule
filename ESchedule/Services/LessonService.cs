@@ -20,12 +20,12 @@ namespace ESchedule.Services
             var response = await httpClient.PostAsJsonAsync<LessonViewModel>("api/LessonWebAPI", model);
             if (response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    return default(LessonViewModel);
-                }
 
                 return await response.Content.ReadFromJsonAsync<LessonViewModel>();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return default(LessonViewModel);
             }
             else
             {
@@ -53,12 +53,12 @@ namespace ESchedule.Services
             var response = await this.httpClient.GetAsync($"api/LessonWebAPI/{id}");
             if (response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    return default(LessonViewModel);
-                }
 
                 return await response.Content.ReadFromJsonAsync<LessonViewModel>();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return default(LessonViewModel);
             }
             else
             {
@@ -74,12 +74,12 @@ namespace ESchedule.Services
             var products = await this.httpClient.GetAsync("api/LessonWebAPI");
             if (products.IsSuccessStatusCode)
             {
-                if (products.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    return Enumerable.Empty<LessonViewModel>();
-                }
 
                 return await products.Content.ReadFromJsonAsync<IEnumerable<LessonViewModel>>();
+            }
+            else if (products.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return Enumerable.Empty<LessonViewModel>();
             }
             else
             {
@@ -95,12 +95,12 @@ namespace ESchedule.Services
             var lessons = await this.httpClient.GetAsync($"api/LessonWebAPI/GetLessonsByDate/{date.ToString("u")}");
             if (lessons.IsSuccessStatusCode)
             {
-                if (lessons.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    return Enumerable.Empty<LessonViewModel>();
-                }
 
                 return await lessons.Content.ReadFromJsonAsync<IEnumerable<LessonViewModel>>();
+            }
+            else if (lessons.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return Enumerable.Empty<LessonViewModel>();
             }
             else
             {
@@ -118,12 +118,12 @@ namespace ESchedule.Services
             var response = await httpClient.PutAsync($"api/LessonWebAPI/{id}", content);
             if (response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-                {
-                    return default(LessonViewModel);
-                }
 
                 return await response.Content.ReadFromJsonAsync<LessonViewModel>();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                return default(LessonViewModel);
             }
             else
             {

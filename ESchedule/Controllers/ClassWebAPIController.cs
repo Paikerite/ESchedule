@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ESchedule.Data;
 using ESchedule.Models;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 
 namespace ESchedule.Controllers
 {
@@ -56,6 +49,39 @@ namespace ESchedule.Controllers
             }
         }
 
+        // GET: api/ClassWebAPI/GetClassesByAdminId/4
+        [HttpGet("GetClassesByAdminId/{id}")]
+        public async Task<ActionResult<IEnumerable<ClassViewModel>>> GetClassesByAdminId(int id)
+        {
+            try
+            {
+                if (_context.Classes == null)
+                {
+                    return NotFound();
+                }
+
+                var classes = await _context.Classes
+                    .Where(c=>c.IdUserAdmin == id)
+                    //.Include(a => a.Lessons)
+                    //.Include(b => b.UsersAccount)
+                    .ToListAsync();
+
+                if (classes == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(classes);
+                }
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error retrieving data from the database: {e}");
+            }
+        }
+
         // GET: api/ClassWebAPI/GetClassByJoinCode/awgets
         [HttpGet("GetClassByJoinCode/{codeToJoin}")]
         public async Task<ActionResult<ClassViewModel>> GetClassByJoinCode(string codeToJoin)
@@ -67,15 +93,15 @@ namespace ESchedule.Controllers
                     return NotFound();
                 }
 
-                var @class = await _context.Classes.FirstOrDefaultAsync(c => c.CodeToJoin == codeToJoin);
+                var classResult = await _context.Classes.FirstOrDefaultAsync(c => c.CodeToJoin == codeToJoin);
 
-                if (@class == null)
+                if (classResult == null)
                 {
                     return NotFound();
                 }
                 else
                 {
-                    return Ok(@class);
+                    return Ok(classResult);
                 }
             }
             catch (Exception e)
@@ -162,16 +188,16 @@ namespace ESchedule.Controllers
                     return NotFound();
                 }
 
-                var @class = await _context.Classes.FirstOrDefaultAsync(c => c.CodeToJoin == joinClass.JoinCode);
-                if (@class == null)
+                var classResult = await _context.Classes.FirstOrDefaultAsync(c => c.CodeToJoin == joinClass.JoinCode);
+                if (classResult == null)
                 {
                     return NotFound();
                 }
 
-                @class.UsersAccount.Add(user);
+                classResult.UsersAccount.Add(user);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetClassViewModel), new { id = @class.Id }, @class);
+                return CreatedAtAction(nameof(GetClassViewModel), new { id = classResult.Id }, classResult);
             }
             catch (Exception e)
             {
