@@ -1,7 +1,14 @@
-﻿@model ESchedule.Models.LessonViewModel
+﻿@model ESchedule.Models.EditAddLessonModel
+@inject IClassService classService
+@inject IUserService userService
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Редагування урока";
+
+    var currectUser = await userService.GetUserByEmail(User.Identity.Name);
+    var availableClasses = await classService.GetClassesByAdminId(currectUser.Id);
+
+    var selectList = new SelectList(availableClasses, nameof(ClassViewModel.Id), nameof(ClassViewModel.Name));
 }
 
 <h1>Редагування</h1>
@@ -42,6 +49,20 @@
                     </div>
                 </div>
                 <div class="mb-3">
+                    @if (selectList.Count() != 0)
+                    {
+                        <label asp-for="SelectedId" class="form-label">Курси до яких відноситься данний урок</label>
+                        <div class="row">
+                            <select name="SelectedId" id="SelectedId" asp-for="SelectedId" asp-items="selectList" class="form-select"></select>
+                        </div>
+                    }
+                    else
+                    {
+                        <span>Ви не керуєте жодним курсом <a asp-area="" asp-controller="Class" asp-action="Create" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Створити свій курс</a></span>
+                    }
+                    <span asp-validation-for="SelectedId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
                     <label asp-for="ColorCard" class="form-label">Колір</label>
                     <input type="color" asp-for="ColorCard" class="form-control form-control-color" />
                     <span asp-validation-for="ColorCard" class="text-danger"></span>
@@ -63,5 +84,7 @@
 
 </div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial"); //it cause calling action again, idk how to fix
+    } 
 }

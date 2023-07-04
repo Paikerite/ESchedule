@@ -44,7 +44,7 @@
 
     
     @*<div id="tableDataLessons">*@
-        @await Component.InvokeAsync(nameof(CalendarWithLessons), new{date = currectDate})
+        @await Component.InvokeAsync(nameof(CalendarWithLessons), new{date = currectDate, lessons=Model})
 @*   </div>*@
 
 @*@section Scripts{

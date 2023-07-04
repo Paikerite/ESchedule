@@ -30,9 +30,9 @@ namespace ESchedule.Controllers
         }
 
         // GET: api/LessonWebAPI/2012-12-31
-        //[HttpGet("{date:datetime}")]
-        [HttpGet("GetLessonsByDate/{date}")]
-        public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByDate(string date) //Bad Date
+        //[HttpGet("GetLessonsByDate/{date}")]
+        [HttpGet("GetLessonsByDateAndName/{date}/{name}")]
+        public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByDateAndName(string date, string name) //Bad Date
         {
             /*var month = date.Day;*/ //because date after transfer through http, date is backwarding, f.e day is month, month is day. idk
             var ConvertedDate = DateTime.Parse(date);
@@ -42,7 +42,10 @@ namespace ESchedule.Controllers
             }
 
             return await _context.Lessons
-                .Where(m => m.DayTime.Month == ConvertedDate.Month && m.DayTime.Year == ConvertedDate.Year)
+                .Include(c=>c.Classes).ThenInclude(a=>a.UsersAccount)
+                .Where(m => m.DayTime.Month == ConvertedDate.Month 
+                        && m.DayTime.Year == ConvertedDate.Year
+                        && m.Classes.Any(c=>c.UsersAccount.Any(u=>u.Email == name)))
                 .OrderBy(a => a.BeginTime.Hour)
                 .ToListAsync();
         }
@@ -51,18 +54,28 @@ namespace ESchedule.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<LessonViewModel>> GetLessonViewModel(int id)
         {
-          if (_context.Lessons == null)
-          {
-              return NotFound();
-          }
-            var lessonViewModel = await _context.Lessons.FindAsync(id);
-
-            if (lessonViewModel == null)
+            try
             {
-                return NotFound();
-            }
+                if (_context.Lessons == null)
+                {
+                    return NotFound();
+                }
+                var lessonViewModel = await _context.Lessons
+                    .Include(c=>c.Classes)
+                    .FirstOrDefaultAsync(l => l.Id == id);
 
-            return lessonViewModel;
+                if (lessonViewModel == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(lessonViewModel);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error updating data from the database: {e}");
+            }
         }
 
         // PUT: api/LessonWebAPI/5
@@ -119,6 +132,45 @@ namespace ESchedule.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     $"Error updating data from the database: {e}");
+            }
+        }
+
+        // PATCH: api/LessonWebAPI/AddClassesToLesson
+        [HttpPatch("AddClassesToLesson")]
+        public async Task<ActionResult<LessonViewModel>> AddClassesToLesson(AddClassesToLessonModel addClassesToLessonModel)
+        {
+            if (addClassesToLessonModel == null)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                var lesson = await _context.Lessons
+                    .Include(c=>c.Classes)
+                    .FirstOrDefaultAsync(u => u.Id == addClassesToLessonModel.IdLesson);
+
+                if (lesson == null)
+                {
+                    return NotFound();
+                }
+
+                var classes = await _context.Classes.Where(x => addClassesToLessonModel.IdsOfClasses.Any(y => y == x.Id)).ToListAsync();
+
+                if (classes == null)
+                {
+                    return NotFound();
+                }
+
+                lesson.Classes = classes;
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetLessonViewModel), new { id = lesson.Id }, lesson);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error retrieving data from the database: {e}");
             }
         }
 

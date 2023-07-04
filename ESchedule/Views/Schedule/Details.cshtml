@@ -1,10 +1,12 @@
 ﻿@using System.Globalization;
 @model ESchedule.Models.LessonViewModel
+@inject IUserService userService
 
 @{
     ViewData["Title"] = "Деталь уроку";
     CultureInfo cultureUa = new CultureInfo("uk-UA");
     string nameOfWeek = Model.DayTime.ToString("ddd", cultureUa);
+    var user = await userService.GetUserByEmail(User.Identity.Name);
 }
 
 
@@ -24,14 +26,27 @@
                 <p>@Html.DisplayFor(model => model.DescriptionLesson)</p>
             </div>
             <div class="card-text">
-                <h5 class="fw-bold">@nameOfWeek @Html.DisplayFor(model=>model.DayTime) @Html.DisplayFor(model => model.BeginTime)-@Html.DisplayFor(model => model.EndTime)</h5>
+                <p>
+                    <h5 class="fw-bold">@nameOfWeek @Html.DisplayFor(model=>model.DayTime) @Html.DisplayFor(model => model.BeginTime)-@Html.DisplayFor(model => model.EndTime)</h5>
+                </p>
+            </div>
+            <div class="card-text">
+                <ul class="list-group list-group-horizontal">
+                    @foreach (var item in Model.Classes)
+                    {
+                        <li class="list-group-item list-group-item-light">@item.Name</li>
+                    }
+                </ul>
             </div>
         </div>
         <div class="card-footer">
             <div class="row">
                 <div class="col">
                     <a class="btn btn-primary" asp-action="Index">Повернутися до розкладу</a>
-                    <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model?.Id">Відредагувати</a>
+                    @if (User.IsInRole("Teacher") && Model.Classes.Any(a => a.IdUserAdmin == user.Id))
+                    {
+                        <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model?.Id" asp-route-userName="@User.Identity.Name">Відредагувати</a>
+                    }
                 </div>
                 <div class="col align-self-center text-end">
                     <div class="text-body-secondary">Додано: @Html.DisplayFor(model => model.Created)</div>
@@ -40,37 +55,3 @@
         </div>
     </div>
 </div>
-
-@*<div>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            Назва уроку
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NameLesson)
-        </dd>
-        <dt class = "col-sm-2">
-            Опис
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DescriptionLesson)
-        </dd>
-        <dt class = "col-sm-2">
-            Час 
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model=>model.DayTime) @Html.DisplayFor(model => model.BeginTime)-@Html.DisplayFor(model => model.EndTime)
-        </dd>
-        <dt class = "col-sm-2">
-            Створений
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Created)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Відредагувати</a> |
-    <a asp-action="Index">Повернутися до розкладу</a>
-</div>*@

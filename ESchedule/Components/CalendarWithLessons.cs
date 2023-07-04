@@ -1,4 +1,5 @@
-﻿using ESchedule.Services.Interfaces;
+﻿using ESchedule.Models;
+using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ESchedule.Components
@@ -12,9 +13,9 @@ namespace ESchedule.Components
             this.lessonService = lessonService;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(DateTime date)
+        public async Task<IViewComponentResult> InvokeAsync(IEnumerable<LessonViewModel> lessons, DateTime date)
         {
-            var lessons = await lessonService.GetLessonsByDate(date);
+            //var lessons = await lessonService.GetLessonsByDate(date);
             //ViewData["DataByUser"] = date;
             ViewBag.Data = date;
             if (lessons != null)

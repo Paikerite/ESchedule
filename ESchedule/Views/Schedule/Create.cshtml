@@ -1,4 +1,5 @@
-﻿@model Tuple<ESchedule.Models.LessonViewModel, ESchedule.Models.MultipleSelectModel>
+﻿@*@model Tuple<ESchedule.Models.LessonViewModel, ESchedule.Models.EditAddLessonModel>*@
+@model ESchedule.Models.EditAddLessonModel
 @inject IClassService classService
 @inject IUserService userService
 
@@ -11,6 +12,10 @@
     //{
     //    selectedItems.Add(new SelectListItem { Value=item.Id.ToString(), Text=item.Name });
     //}
+    var currectUser = await userService.GetUserByEmail(User.Identity.Name);
+    var availableClasses = await classService.GetClassesByAdminId(currectUser.Id);
+
+    var selectList = new SelectList(availableClasses, nameof(ClassViewModel.Id), nameof(ClassViewModel.Name));
 }
 
 <h1>Створити урок</h1>
@@ -22,76 +27,50 @@
             <form asp-action="Create" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="mb-3">
-                    <label asp-for="Item1.NameLesson" class="form-label">Назва уроку</label>
-                    <input asp-for="Item1.NameLesson" class="form-control" />
-                    <span asp-validation-for="Item1.NameLesson" class="text-danger"></span>
+                    <label asp-for="NameLesson" class="form-label">Назва уроку</label>
+                    <input asp-for="NameLesson" class="form-control" />
+                    <span asp-validation-for="NameLesson" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Item1.DescriptionLesson" class="form-label">Опис уроку</label>
-                    <textarea type="text" asp-for="Item1.DescriptionLesson" class="form-control"></textarea>
-                    <span asp-validation-for="Item1.DescriptionLesson" class="text-danger"></span>
+                    <label asp-for="DescriptionLesson" class="form-label">Опис уроку</label>
+                    <textarea type="text" asp-for="DescriptionLesson" class="form-control"></textarea>
+                    <span asp-validation-for="DescriptionLesson" class="text-danger"></span>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
-                        <label asp-for="Item1.DayTime" class="form-label">День</label>
-                        <input asp-for="Item1.DayTime" class="form-control" />
-                        <span asp-validation-for="Item1.DayTime" class="text-danger"></span>
+                        <label asp-for="DayTime" class="form-label">День</label>
+                        <input asp-for="DayTime" class="form-control" />
+                        <span asp-validation-for="DayTime" class="text-danger"></span>
                     </div>
                     <div class="col">
-                        <label asp-for="Item1.BeginTime" class="form-label">Початок уроку</label>
-                        <input asp-for="Item1.BeginTime" class="form-control" />
-                        <span asp-validation-for="Item1.BeginTime" class="text-danger"></span>
+                        <label asp-for="BeginTime" class="form-label">Початок уроку</label>
+                        <input asp-for="BeginTime" class="form-control" />
+                        <span asp-validation-for="BeginTime" class="text-danger"></span>
                     </div>
                     <div class="col">
-                        <label asp-for="Item1.EndTime" class="form-label">Кінець уроку</label>
-                        <input asp-for="Item1.EndTime" class="form-control" />
-                        <span asp-validation-for="Item1.EndTime" class="text-danger"></span>
+                        <label asp-for="EndTime" class="form-label">Кінець уроку</label>
+                        <input asp-for="EndTime" class="form-control" />
+                        <span asp-validation-for="EndTime" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="mb-3">
-                    @if (Model.Item2.SelectedClasses.Count() != 0)
+                    @if (selectList.Count() != 0)
                     {
-                        <label asp-for="Item2.SelectedClasses" class="form-label">Курси до яких відноситься данний урок</label>
-@*                        <div class="card p-2">
-                            <div class="row">
-                                @for (int i = 0; i < Model.Classes.Count; i++)
-                                {
-                                                                    <div class="col-auto m-1">
-                            <input name="Classes[@i].Id" value="@Model.Classes[i].Id" type="checkbox" class="btn-check" id="Classes[@i].Id" autocomplete="off">
-                            <label for="Classes[@i].Id" class="btn btn-outline-primary">@Model.Classes[i].Name</label>
-                            </div>
-                                    <div class="col-auto m-1">
-                                        <label asp-for="Classes[i].Name" class="btn btn-outline-primary">@Model.Classes[i].Name</label>
-                                        <input asp-for="Classes[i].Name" name="Classes[@i]" value="@Model.Classes[i]" type="checkbox" class="btn-check" id="Classes[@i]" autocomplete="off">
-                                    </div>
-                                }
-                            </div>
-                        </div>*@
+                        <label asp-for="SelectedId" class="form-label">Курси до яких відноситься данний урок</label>
                         <div class="row">
-@*                            <ul class="list-group list-group-horizontal pe-0">
-                                @foreach (var item in Model.Classes)
-                                {
-                                    <li class="list-group-item">
-                                        @item.Name
-                                        <a class="link-underline-light link-danger" asp-action="RemoveCourse" asp-route-lessonViewModel="@Model" asp-route-classViewModel="@item">
-                                            <span class="material-icons">remove</span>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>*@
-                            <select name="SelectedId" id="Item2_SelectedClasses" asp-for="Item2.SelectedId" asp-items="Model.Item2.SelectedClasses" class="form-select"></select>
+                            <select name="SelectedId" id="SelectedId" asp-for="SelectedId" asp-items="selectList" class="form-select"></select>
                         </div>
                     }
                     else
                     {
                         <span>Ви не керуєте жодним курсом <a asp-area="" asp-controller="Class" asp-action="Create" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Створити свій курс</a></span>
                     }
-                    <span asp-validation-for="Item2.SelectedClasses" class="text-danger"></span>
+                    <span asp-validation-for="SelectedId" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
-                    <label asp-for="Item1.ColorCard" class="form-label">Колір</label>
-                    <input type="color" asp-for="Item1.ColorCard" class="form-control form-control-color" />
-                    <span asp-validation-for="Item1.ColorCard" class="text-danger"></span>
+                    <label asp-for="ColorCard" class="form-label">Колір</label>
+                    <input type="color" asp-for="ColorCard" class="form-control form-control-color" />
+                    <span asp-validation-for="ColorCard" class="text-danger"></span>
                 </div>
                 <div class="row g-2 mb-3">
                     <div class="col-auto">
@@ -112,6 +91,6 @@
 
 @section Scripts {
     @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial"); 
     }
 }

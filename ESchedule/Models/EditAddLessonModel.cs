@@ -1,9 +1,11 @@
 ﻿using ESchedule.Data;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ESchedule.Models
 {
-    public class LessonViewModel
+    public class EditAddLessonModel
     {
         [Key]
         public int Id { get; set; }
@@ -26,12 +28,14 @@ namespace ESchedule.Models
         [Required(ErrorMessage = "Необхідно назначити день проведення урока")]
         public DateTime DayTime { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime Created { get; set; }
-
         [Required(ErrorMessage = "Необхідно обрати кольор уроку")]
         public string ColorCard { get; set; }
 
-        public List<ClassViewModel> Classes { get; set; } = new();
+        [DataType(DataType.Date)]
+        public DateTime Created { get; set; }
+
+        [CannotBeEmptyList(ErrorMessage = "Необхідно обрати курси, яким буде відображатися даний урок")]
+        [Required(ErrorMessage = "Необхідно обрати курси, яким буде відображатися даний урок")]
+        public List<int>? SelectedId { get;set; }
     }
 }
