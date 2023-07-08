@@ -61,7 +61,7 @@ namespace ESchedule.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> IndexShowLessonsList()
         {
-            var lessons = await lessonService.GetLessons();
+            var lessons = await lessonService.GetLessonsByName(User.Identity.Name);
 
             if (lessons != null)
             {

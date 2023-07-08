@@ -29,8 +29,7 @@ namespace ESchedule.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/LessonWebAPI/2012-12-31
-        //[HttpGet("GetLessonsByDate/{date}")]
+        // GET: api/LessonWebAPI/2012-12-31/{abcd@gmail.com}
         [HttpGet("GetLessonsByDateAndName/{date}/{name}")]
         public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByDateAndName(string date, string name) //Bad Date
         {
@@ -46,6 +45,22 @@ namespace ESchedule.Controllers
                 .Where(m => m.DayTime.Month == ConvertedDate.Month 
                         && m.DayTime.Year == ConvertedDate.Year
                         && m.Classes.Any(c=>c.UsersAccount.Any(u=>u.Email == name)))
+                .OrderBy(a => a.BeginTime.Hour)
+                .ToListAsync();
+        }
+
+        // GET: api/LessonWebAPI/abcd@gmail.com
+        [HttpGet("GetLessonsByName/{name}")]
+        public async Task<ActionResult<IEnumerable<LessonViewModel>>> GetLessonsByName(string name)
+        {
+            if (_context.Lessons == null)
+            {
+                return NotFound();
+            }
+
+            return await _context.Lessons
+                .Include(c => c.Classes).ThenInclude(a => a.UsersAccount)
+                .Where(m => m.Classes.Any(c => c.UsersAccount.Any(u => u.Email == name)))
                 .OrderBy(a => a.BeginTime.Hour)
                 .ToListAsync();
         }

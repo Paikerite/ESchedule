@@ -49,6 +49,8 @@ namespace ESchedule.Controllers
             }
         }
 
+
+
         // GET: api/ClassWebAPI/GetClassesByAdminId/4
         [HttpGet("GetClassesByAdminId/{id}")]
         public async Task<ActionResult<IEnumerable<ClassViewModel>>> GetClassesByAdminId(int id)
@@ -64,6 +66,37 @@ namespace ESchedule.Controllers
                     .Where(c=>c.IdUserAdmin == id)
                     //.Include(a => a.Lessons)
                     //.Include(b => b.UsersAccount)
+                    .ToListAsync();
+
+                if (classes == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(classes);
+                }
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Error retrieving data from the database: {e}");
+            }
+        }
+
+        [HttpGet("GetClassesByNameSearch/{userName}/{searchName}")]
+        public async Task<ActionResult<IEnumerable<ClassViewModel>>> GetClassesByNameSearch(string searchName, string userName)
+        {
+            try
+            {
+                if (_context.Classes == null)
+                {
+                    return NotFound();
+                }
+
+                var classes = await _context.Classes
+                    .Where(c => c.UsersAccount.Any(u => u.Email == userName))
+                    .Where(n => n.Name.ToLower().Contains(searchName.ToLower()))
                     .ToListAsync();
 
                 if (classes == null)

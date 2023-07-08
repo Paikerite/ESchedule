@@ -21,9 +21,9 @@
                 <div class="col-md-4">
                     <label class="mb-2">Місяць та рік</label>
                     <form id="datebyuserform" method="post"> @*asp-action="Calendar" *@
-                        <div class="hstack">
-                            <input class="form-control me-2" type="date" name="datebyuser" value="@defaultValue" />
-                            <button type="submit" class="btn btn-outline-primary">Вибрати</button>
+                        <div class="input-group">
+                            <input class="form-control" type="date" name="datebyuser" value="@defaultValue" />
+                            <button type="submit" class="btn btn-outline-secondary">Вибрати</button>
                         </div>
                     </form>
                 </div>
@@ -32,10 +32,20 @@
             {
                 <div class="row">
                     <div class="col-auto">
-                        <a class="btn btn-success" asp-action="Create">Запланувати урок</a>
+                        <a class="btn btn-success hstack" asp-action="Create">
+                            <span class="material-icons me-2">
+                                add_circle
+                            </span>
+                            Запланувати урок
+                        </a>
                     </div>
                     <div class="col-auto">
-                        <a class="btn btn-primary" asp-action="IndexShowLessonsList">Список уроків</a>
+                        <a class="btn btn-primary hstack" asp-action="IndexShowLessonsList">
+                            <span class="material-icons me-2">
+                                list
+                            </span>
+                            Список уроків
+                        </a>
                     </div>
                 </div>
             }

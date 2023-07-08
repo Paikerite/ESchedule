@@ -131,6 +131,27 @@ namespace ESchedule.Services
 
         }
 
+        public async Task<IEnumerable<LessonViewModel>> GetLessonsByName(string UserName)
+        {
+
+            var lessons = await this.httpClient.GetAsync($"api/LessonWebAPI/GetLessonsByName/{UserName}");
+            if (lessons.IsSuccessStatusCode)
+            {
+
+                return await lessons.Content.ReadFromJsonAsync<IEnumerable<LessonViewModel>>();
+            }
+            else if (lessons.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return Enumerable.Empty<LessonViewModel>();
+            }
+            else
+            {
+                var message = await lessons.Content.ReadAsStringAsync();
+                throw new Exception($"http status:{lessons.StatusCode}, message:{message}");
+            }
+
+        }
+
         public async Task<LessonViewModel> UpdateLesson(int id, LessonViewModel model)
         {
             var JsonRequest = JsonConvert.SerializeObject(model);

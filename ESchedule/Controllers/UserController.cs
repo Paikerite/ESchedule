@@ -14,6 +14,7 @@ using ESchedule.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity;
+using ESchedule.Services;
 
 namespace ESchedule.Controllers
 {
@@ -135,7 +136,7 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
+        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
         {
             if (id != userAccountViewModel.Id)
             {
@@ -146,6 +147,17 @@ namespace ESchedule.Controllers
             {
                 try
                 {
+                    //var profilePicture = await _context.Users.FindAsync(id);
+
+                    var pathToImage = await UploadFile(fileAvatar);
+                    if (pathToImage != null && userAccountViewModel.ProfilePicture != null)
+                    {
+                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", userAccountViewModel.ProfilePicture);
+                        System.IO.File.Delete(path);
+                    }
+
+                    userAccountViewModel.ProfilePicture = pathToImage;
+
                     _context.Update(userAccountViewModel);
                     await _context.SaveChangesAsync();
                 }
@@ -160,6 +172,11 @@ namespace ESchedule.Controllers
                         throw;
                     }
                 }
+                catch (Exception ex) 
+                {
+                    ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
+                    return View(userAccountViewModel);
+                }   
                 return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
             }
             return View(userAccountViewModel);
@@ -232,6 +249,29 @@ namespace ESchedule.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+        }
+
+        public async Task<string> UploadFile(IFormFile fileAvatar)
+        {
+            //ImageFiles.Clear(); 
+            // e.GetMultipleFiles(maxAllowedFiles) for several files
+            int maxFileSize = 1024 * 1024 * 10; // 10MB
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "AvatarsImages");
+
+            string newFileName = Path.ChangeExtension(Path.GetRandomFileName(),
+                                                      Path.GetExtension(fileAvatar.FileName));
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string absolutePath = Path.Combine(path, newFileName);
+            string relativePath = Path.Combine("AvatarsImages", newFileName);
+
+            await using FileStream fs = new(absolutePath, FileMode.Create);
+            await fileAvatar.OpenReadStream().CopyToAsync(fs, maxFileSize);
+
+            return relativePath;
         }
     }
 }

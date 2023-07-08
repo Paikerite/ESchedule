@@ -6,6 +6,7 @@ namespace ESchedule.Services.Interfaces
     {
         Task<IEnumerable<LessonViewModel>> GetLessons();
         Task<IEnumerable<LessonViewModel>> GetLessonsByDateAndName(DateTime Date, string UserName);
+        Task<IEnumerable<LessonViewModel>> GetLessonsByName(string UserName);
         Task<LessonViewModel> AddClassesToLesson(AddClassesToLessonModel classesToLessonModel);
         Task<LessonViewModel> GetLesson(int id);
         Task<LessonViewModel> UpdateLesson(int id, LessonViewModel model);

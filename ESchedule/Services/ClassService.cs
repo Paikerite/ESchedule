@@ -107,6 +107,24 @@ namespace ESchedule.Services
             }
         }
 
+        public async Task<IEnumerable<ClassViewModel>> GetClassesBySearchName(string nameClass, string nameUser)
+        {
+            var response = await this.httpClient.GetAsync($"api/ClassWebAPI/GetClassesByNameSearch/{nameUser}/{nameClass}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<IEnumerable<ClassViewModel>>();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return Enumerable.Empty<ClassViewModel>();
+            }
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                throw new Exception($"http status:{response.StatusCode}, message:{message}");
+            }
+        }
+
         public async Task<IEnumerable<ClassViewModel>> GetClassesByAdminId(int id)
         {
             var response = await this.httpClient.GetAsync($"api/ClassWebAPI/GetClassesByAdminId/{id}");

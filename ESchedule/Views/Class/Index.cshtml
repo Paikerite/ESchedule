@@ -17,23 +17,33 @@
     <div class="card mb-2 shadow-sm">
         <div class="card-body">
             <div class="row mb-2">
-                <div class="col-md-4">
+                <div class="col-md-auto">
                     <form id="searchform" method="post">
-                        <div class="input-group mb-3">
-                            <input class="form-control" type="search" name="searchbyuser" placeholder="Пошук"/>
-                            <button type="submit" class="btn btn-outline-primary">Пошук</button>
+                        <div class="input-group">
+                            <input class="form-control" type="search" name="searchName" placeholder="Пошук" />
+                            <button role="search" type="submit" class="btn btn-outline-secondary">Пошук</button>
                         </div>
                     </form>
                 </div>
-                <div class="col-md-8">
-                    <a class="btn btn-primary" asp-action="JoinClass">Приєднатися до курсу</a>
+                <div class="col-md-auto">
+                    <a class="btn btn-primary hstack" asp-action="JoinClass">
+                        <span class="material-icons me-2">
+                            person_add
+                        </span>
+                        Приєднатися до курсу
+                    </a>
                 </div>
             </div>
             @if (User.IsInRole("Teacher"))
             {
                 <div class="row">
                     <div class="col-auto">
-                        <a class="btn btn-success" asp-action="Create">Створити клас</a>
+                        <a class="btn btn-success hstack" asp-action="Create">
+                            <span class="material-icons me-2">
+                                add_circle
+                            </span>
+                            Створити клас
+                        </a>
                     </div>
                 </div>
             }
@@ -56,8 +66,18 @@
                         @if (User.IsInRole("Teacher") && item.IdUserAdmin == currectIdUser)
                         {
                             <div class="btn-group w-100" role="group" aria-label="Basic example">
-                                <a asp-action="Edit" class="btn btn-success" asp-route-id="@item.Id">Редагувати</a>
-                                <a asp-action="Delete" class="btn btn-danger" asp-route-id="@item.Id">Видалити</a>
+                                <a asp-action="Edit" class="btn btn-success hstack" asp-route-id="@item.Id">
+                                    <span class="material-icons me-2">
+                                        edit
+                                    </span>
+                                    Редагувати
+                                </a>
+                                <a asp-action="Delete" class="btn btn-danger hstack" asp-route-id="@item.Id">
+                                    <span class="material-icons me-2">
+                                        delete
+                                    </span>
+                                    Видалити
+                                </a>
                             </div>                      
                         }
                     </div>

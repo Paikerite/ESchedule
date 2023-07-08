@@ -48,6 +48,37 @@ namespace ESchedule.Controllers
             }
         }
 
+        // GET: Class/programming
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(string searchName)
+        {
+            var classes = Enumerable.Empty<ClassViewModel>();
+            var currctUserName = User.Identity.Name;
+
+            if (currctUserName != null)
+            {
+                if (!string.IsNullOrWhiteSpace(searchName))
+                {
+                    classes = await classService.GetClassesBySearchName(searchName, currctUserName);
+                }
+                else
+                {
+                    classes = await classService.GetClassesByUserName(currctUserName);
+                }
+            }
+
+            if (classes != null)
+            {
+                return View(classes);
+            }
+            else
+            {
+                return Problem("Entity set 'EScheduleDbContext.Classes'  is null.");
+            }
+        }
+
         // GET: Class/Details/5
         [Authorize(Roles = "Student,Teacher")]
         public async Task<IActionResult> Details(int id)
