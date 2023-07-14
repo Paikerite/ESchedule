@@ -154,7 +154,10 @@ namespace ESchedule.Controllers
                 {
                     return NotFound();
                 }
-                var classViewModel = await _context.Classes.FindAsync(id);
+                var classViewModel = await _context.Classes
+                    .Include(c => c.Lessons)
+                    .Include(l=>l.UsersAccount)
+                    .FirstOrDefaultAsync(i=>i.Id==id);
 
                 if (classViewModel == null)
                 {

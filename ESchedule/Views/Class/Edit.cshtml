@@ -1,52 +1,57 @@
 ﻿@model ESchedule.Models.ClassViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Редагування класу";
 }
 
-<h1>Edit</h1>
+<h1 style="color:#fff4e4">Створення класу</h1>
 
-<h4>ClassViewModel</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="card shadow-sm col-md-5 col-lg-6">
+            <div class="card-body">
+                <div class="row">
+                    <form asp-action="Edit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="IdUserAdmin" />
+                        <div class="form-group">
+                            <label asp-for="Name" class="control-label">Назва класу</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label">Опис класу</label>
+                            <textarea type="text" asp-for="Description" class="form-control"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CodeToJoin" class="control-label">Код для приєднання (мін. кількість символів 6)</label>
+                            <input asp-for="CodeToJoin" class="form-control" />
+                            <span asp-validation-for="CodeToJoin" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PrimaryColor" class="form-label">Колір</label>
+                            <input type="color" asp-for="PrimaryColor" class="form-control form-control-color" />
+                            <span asp-validation-for="PrimaryColor" class="text-danger"></span>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-auto">
+                                <input type="submit" value="Створити" class="btn btn-primary" />
+                            </div>
+                            <div class="col-auto">
+                                <a class="link-underline-light align-middle" asp-action="Index">
+                                    <span class="material-icons md-18 align-middle">arrow_back</span>
+                                    Повернутися до список класів
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdUserAdmin" class="control-label"></label>
-                <input asp-for="IdUserAdmin" class="form-control" />
-                <span asp-validation-for="IdUserAdmin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CodeToJoin" class="control-label"></label>
-                <input asp-for="CodeToJoin" class="form-control" />
-                <span asp-validation-for="CodeToJoin" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="PrimaryColor" class="form-label">Колір</label>
-                <input type="color" asp-for="PrimaryColor" class="form-control form-control-color" />
-                <span asp-validation-for="PrimaryColor" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

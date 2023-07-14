@@ -19,11 +19,13 @@ namespace ESchedule.Controllers
     {
         private readonly IClassService classService;
         private readonly IUserService userService;
+        private readonly ILessonService lessonService;
 
-        public ClassController(IClassService classService, IUserService userService)
+        public ClassController(IClassService classService, IUserService userService, ILessonService lessonService)
         {
             this.classService = classService;
             this.userService = userService;
+            this.lessonService = lessonService;
         }
 
         // GET: Class
@@ -205,7 +207,17 @@ namespace ESchedule.Controllers
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var classViewModel = await classService.GetClass(id);
+
             await classService.DeleteClass(id);
+
+            foreach (var item in classViewModel.Lessons)
+            {
+                if (item.Classes.Count() != 0)
+                {
+                    await lessonService.DeleteLesson(item.Id);
+                }
+            }
 
             return RedirectToAction(nameof(Index));
         }

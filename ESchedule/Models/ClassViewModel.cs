@@ -6,8 +6,9 @@ namespace ESchedule.Models
     {
         [Key]
         public int Id { get; set; }
-
+        [Required(ErrorMessage = "Необхідне назва курсу")]
         public string Name { get; set; }
+        [Required(ErrorMessage = "Необхідне роз'яснення або мета курсу")]
         public string Description { get; set; }
         public string PrimaryColor { get; set; }
         public int IdUserAdmin { get; set; }
