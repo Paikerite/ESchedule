@@ -26,7 +26,10 @@
     if (userName != null)
     {
         var currectUser = await userService.GetUserByEmail(userName);
-        currectIdUser = currectUser.Id;
+        if (currectUser != null)
+        {
+            currectIdUser = currectUser.Id;
+        }
     }
 }
 

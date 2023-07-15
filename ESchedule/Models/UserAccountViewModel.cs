@@ -1,11 +1,12 @@
 ﻿using ESchedule.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.InteropServices;
 
 namespace ESchedule.Models
 {
-    public class UserAccountViewModel
+    public class UserAccountViewModel : IdentityUser
     {
         [Key]
         public int Id { get; set; }

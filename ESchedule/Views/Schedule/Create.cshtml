@@ -1,17 +1,10 @@
-﻿@*@model Tuple<ESchedule.Models.LessonViewModel, ESchedule.Models.EditAddLessonModel>*@
+﻿
 @model ESchedule.Models.EditAddLessonModel
 @inject IClassService classService
 @inject IUserService userService
 
 @{
     ViewData["Title"] = "Урок";
-    //List<SelectListItem> selectedItems = new();
-    //var currectUser = await userService.GetUserByEmail(User.Identity.Name);
-    //var classesAvailable = await classService.GetClassesByAdminId(currectUser.Id);
-    //foreach (var item in classesAvailable)
-    //{
-    //    selectedItems.Add(new SelectListItem { Value=item.Id.ToString(), Text=item.Name });
-    //}
     var currectUser = await userService.GetUserByEmail(User.Identity.Name);
     var availableClasses = await classService.GetClassesByAdminId(currectUser.Id);
 

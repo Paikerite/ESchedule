@@ -2,13 +2,8 @@
 using ESchedule.Services;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Converters;
-using System.ComponentModel;
 using System.Text.Json.Serialization;
-using System.Text.Json;
 
 namespace ESchedule
 {
@@ -39,6 +34,9 @@ namespace ESchedule
             {
                 BaseAddress = new Uri("https://localhost:7087/")
             });
+
+            //builder.Services.AddTransient<IEmailSender, EmailSender>();
+            //builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
             builder.Services.AddScoped<ILessonService, LessonService>();
             builder.Services.AddScoped<IUserService, UserService>();

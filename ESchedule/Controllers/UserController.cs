@@ -22,7 +22,6 @@ namespace ESchedule.Controllers
     public class UserController : Controller
     {
         private readonly EScheduleDbContext _context;
-        //private readonly IEmailSender emailSender;
 
         public UserController(EScheduleDbContext context)
         {
@@ -101,6 +100,7 @@ namespace ESchedule.Controllers
                 var user = await _context.Users.AnyAsync(a => a.Email == userAccountViewModel.Email);
                 if (user == false)
                 {
+                    //await emailSender.SendEmailAsync(userAccountViewModel.Email, $"{userAccountViewModel.Name} {userAccountViewModel.SurName}", "Test text");
                     _context.Add(userAccountViewModel);
                     await _context.SaveChangesAsync();
                     await Authenticate(userAccountViewModel.Email, userAccountViewModel.Role);
@@ -222,6 +222,7 @@ namespace ESchedule.Controllers
             }
             
             await _context.SaveChangesAsync();
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
         }
 
