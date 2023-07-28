@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ESchedule.Data;
 using ESchedule.Models;
@@ -12,9 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using ESchedule.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity;
 using ESchedule.Services;
+using ESchedule.Services.Interfaces;
 
 namespace ESchedule.Controllers
 {
@@ -22,10 +17,14 @@ namespace ESchedule.Controllers
     public class UserController : Controller
     {
         private readonly EScheduleDbContext _context;
+        //private readonly UserManager<UserAccountViewModel> _userManager;
+        //private readonly SignInManager<UserAccountViewModel> _signInManager;
+        private readonly IEmailService emailService;
 
-        public UserController(EScheduleDbContext context)
+        public UserController(EScheduleDbContext context, IEmailService emailService)
         {
             _context = context;
+            this.emailService = emailService;
         }
 
         // GET: User
@@ -71,13 +70,34 @@ namespace ESchedule.Controllers
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
                 if (user != null)
                 {
-                    await Authenticate(model.Email, user.Role); // аутентификация
+                    if (user.IsConfirmEmail)
+                    {
+                        await Authenticate(model.Email, user.Role); // аутентификация
 
-                    return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                        return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                    }
+                    else
+                    {
+                        return RedirectToAction("MustConfirmEmail", new {UserId = user.Id});
+                    }
                 }
                 ModelState.AddModelError("", "Невірний логін і(або) пароль");
             }
             return View(model);
+        }
+
+        //[AllowAnonymous]
+        //public IActionResult MustConfirmEmail()
+        //{
+        //    return View();
+        //}
+
+        [AllowAnonymous]
+        public async Task<IActionResult> MustConfirmEmail(int UserId)
+        {
+            var user = await _context.Users.FindAsync(UserId);
+            await SendEmail(user);
+            return View(user);
         }
 
         // GET: User/Create
@@ -93,19 +113,24 @@ namespace ESchedule.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Create([Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
+        public async Task<IActionResult> Create([Bind("Id,IsConfirmEmail,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
         {
             if (ModelState.IsValid)
             {
-                var user = await _context.Users.AnyAsync(a => a.Email == userAccountViewModel.Email);
-                if (user == false)
+                var userIsExist = await _context.Users.AnyAsync(a => a.Email == userAccountViewModel.Email);
+                if (userIsExist == false)
                 {
-                    //await emailSender.SendEmailAsync(userAccountViewModel.Email, $"{userAccountViewModel.Name} {userAccountViewModel.SurName}", "Test text");
+                    userAccountViewModel.IsConfirmEmail = false;
                     _context.Add(userAccountViewModel);
                     await _context.SaveChangesAsync();
-                    await Authenticate(userAccountViewModel.Email, userAccountViewModel.Role);
 
-                    return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                    await SendEmail(userAccountViewModel);
+
+                    return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
+
+                    //await Authenticate(userAccountViewModel.Email, userAccountViewModel.Role);
+
+                    //return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
                 }
                 else
                 {
@@ -113,6 +138,52 @@ namespace ESchedule.Controllers
                 }
             }
             return View(userAccountViewModel);
+        }
+
+        public async Task SendEmail(UserAccountViewModel userAccountViewModel)
+        {
+            var code = Guid.NewGuid();
+            userAccountViewModel.CodeToConfirmEmail = code;
+            _context.Update(userAccountViewModel);
+            await _context.SaveChangesAsync();
+            // генерация токена для пользователя
+            var callbackUrl = Url.Action(
+                "ConfirmEmail",
+                "User",
+                new { userId = userAccountViewModel.Id, code },
+                protocol: HttpContext.Request.Scheme);
+            //EmailService emailService = new EmailService();
+            await emailService.SendEmailAsync(userAccountViewModel.Email, $"{userAccountViewModel.Name} {userAccountViewModel.SurName}", "Confirm your account",
+                $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return View("Error");
+            }
+            var user = await _context.Users.FindAsync(int.Parse(userId));
+            if (user == null)
+            {
+                return View("Error");
+            }
+            //var result = await _userManager.ConfirmEmailAsync(user, code);
+            if (Guid.Parse(code) == user.CodeToConfirmEmail)
+            {
+                user.IsConfirmEmail = true;
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+
+                await Authenticate(user.Email, user.Role);
+                return RedirectToAction("Index", "Schedule");
+            }
+            else
+            {
+                return View("Error");
+            }
+
         }
 
         // GET: User/Edit/5
@@ -172,11 +243,11 @@ namespace ESchedule.Controllers
                         throw;
                     }
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
                     return View(userAccountViewModel);
-                }   
+                }
                 return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
             }
             return View(userAccountViewModel);
@@ -220,7 +291,7 @@ namespace ESchedule.Controllers
             {
                 _context.Users.Remove(userAccountViewModel);
             }
-            
+
             await _context.SaveChangesAsync();
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction(nameof(ScheduleController.Index), "Schedule");

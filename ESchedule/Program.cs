@@ -35,9 +35,7 @@ namespace ESchedule
                 BaseAddress = new Uri("https://localhost:7087/")
             });
 
-            //builder.Services.AddTransient<IEmailSender, EmailSender>();
-            //builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
-
+            builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddScoped<ILessonService, LessonService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClassService, ClassService>();

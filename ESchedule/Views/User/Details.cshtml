@@ -1,61 +1,48 @@
 ﻿@model ESchedule.Models.UserAccountViewModel
+@inject IUserService userService
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Інформація про акаунт";
+    var user = await userService.GetUserByEmail(User.Identity.Name);
 }
-
-<h1>Details</h1>
-
-<div>
-    <h4>UserAccountViewModel</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SurName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SurName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PatronymicName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PatronymicName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProfilePicture)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProfilePicture)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Role)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Role)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Password)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Password)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a> |
-    <a asp-action="Delete" asp-route-id="@Model?.Id">Delete account</a>
+<div class="container">
+    <div class="card mb-2 shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="hstack">
+@*                    <img src="~/AvatarsImages/@Model.ProfilePicture"/>*@
+                    <div class="col text-center">
+                        <h2 class="fw-bold">@Model.Name @Model.SurName @Model.PatronymicName</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-4 align-self-center text-center" style="max-width: 250px;">
+                    <img class="img-fluid" src="~/@Model.ProfilePicture"/>
+                </div>
+                <div class="col-8">
+                    <div class="card-text">
+                        <p>ПІБ: @Model.Name @Model.SurName @Model.PatronymicName</p>
+                        <p>Роль у системі: @Model.Role.ToString();</p>
+                        <p>Пошта: @Model.Email</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col">
+                    @if (user.Id == Model.Id)
+                    {
+                        <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model?.Id" asp-route-userName="@User.Identity.Name">Відредагувати</a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model?.Id" asp-route-userName="@User.Identity.Name">Видалити акаунт</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -10,7 +10,7 @@
             Підтвердження
         </div>
         <div class="card-body">
-            <h5 class="card-title">Ви впевнені що хочіте <a class="pe-none text-danger" tabindex="-1" aria-disabled="true">видалити</a> урок @Model.NameLesson?</h5>
+            <h5 class="card-title">Ви впевнені що хочіте <a class="pe-none text-danger" tabindex="-1">видалити</a> урок @Model.NameLesson?</h5>
             <form asp-action="Delete">
                 <input type="hidden" asp-for="Id" />
                 <input type="submit" value="Видалити" class="btn btn-danger" />

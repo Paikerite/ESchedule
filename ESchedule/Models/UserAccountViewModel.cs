@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace ESchedule.Models
 {
-    public class UserAccountViewModel : IdentityUser
+    public class UserAccountViewModel
     {
         [Key]
         public int Id { get; set; }
@@ -28,6 +28,10 @@ namespace ESchedule.Models
 
         [Required(ErrorMessage = "Не вказан Email")]
         public string Email { get; set; }
+
+        public bool IsConfirmEmail { get; set; }
+
+        public Guid CodeToConfirmEmail { get; set; }
 
         [Required(ErrorMessage = "Не вказан пароль")]
         [MinLength(6, ErrorMessage = "Мінімальна кількість символів - 6")]
