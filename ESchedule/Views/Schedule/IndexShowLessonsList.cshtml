@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Розклад";
+    var userName = User.Identity.Name;
 }
 
 <div class="container">
@@ -54,7 +55,7 @@
                                 @Html.DisplayFor(modelItem => item.Created)
                             </th>
                             <td>
-                                <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id">
+                                <a class="link-underline-light" asp-action="Edit" asp-route-id="@item.Id" asp-route-userName="@userName">
                                     <span class="material-icons">edit</span>
                                 </a>
                                 <a class="link-underline-light" asp-action="Details" asp-route-id="@item.Id">

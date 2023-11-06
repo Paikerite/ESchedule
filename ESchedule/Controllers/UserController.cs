@@ -86,12 +86,6 @@ namespace ESchedule.Controllers
             return View(model);
         }
 
-        //[AllowAnonymous]
-        //public IActionResult MustConfirmEmail()
-        //{
-        //    return View();
-        //}
-
         [AllowAnonymous]
         public async Task<IActionResult> MustConfirmEmail(int UserId)
         {
@@ -113,20 +107,30 @@ namespace ESchedule.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Create([Bind("Id,IsConfirmEmail,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
+        public async Task<IActionResult> Create(IFormFile fileAvatar, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,IsConfirmEmail,CodeToConfirmEmail,Password")] UserAccountViewModel userAccountViewModel)
         {
             if (ModelState.IsValid)
             {
                 var userIsExist = await _context.Users.AnyAsync(a => a.Email == userAccountViewModel.Email);
                 if (userIsExist == false)
                 {
-                    userAccountViewModel.IsConfirmEmail = false;
-                    _context.Add(userAccountViewModel);
-                    await _context.SaveChangesAsync();
+                    try
+                    {
+                        userAccountViewModel.IsConfirmEmail = false;
+                        var pathToImage = await UploadFile(fileAvatar);
 
-                    await SendEmail(userAccountViewModel);
+                        userAccountViewModel.ProfilePicture = pathToImage;
+                        _context.Add(userAccountViewModel);
+                        await _context.SaveChangesAsync();
 
-                    return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
+                        await SendEmail(userAccountViewModel);
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
+                        return View(userAccountViewModel);
+                    }
+                    return Content("Для завершення реєстрації перевірте електронну пошту та перейдіть за посиланням, вказаним у листі.");
 
                     //await Authenticate(userAccountViewModel.Email, userAccountViewModel.Role);
 
@@ -207,7 +211,7 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password")] UserAccountViewModel userAccountViewModel)
+        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password,CodeToConfirmEmail")] UserAccountViewModel userAccountViewModel)
         {
             if (id != userAccountViewModel.Id)
             {
@@ -328,6 +332,10 @@ namespace ESchedule.Controllers
             //ImageFiles.Clear(); 
             // e.GetMultipleFiles(maxAllowedFiles) for several files
             int maxFileSize = 1024 * 1024 * 10; // 10MB
+            if (fileAvatar.Length >= maxFileSize)
+            {
+                throw new Exception("Файл занадто великого розміру, максимум 10 mb");
+            }
             string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "AvatarsImages");
 
             string newFileName = Path.ChangeExtension(Path.GetRandomFileName(),

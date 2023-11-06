@@ -21,8 +21,10 @@ namespace ESchedule
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
 
-            builder.Services.AddDbContextPool<EScheduleDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"))
+            builder.Services.AddDbContextPool<EScheduleDbContext>(options => {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+                //options.EnableSensitiveDataLogging(true);
+            }
                 /*o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))*/);
 
             //https://learn.microsoft.com/ru-ru/ef/core/querying/single-split-queries
