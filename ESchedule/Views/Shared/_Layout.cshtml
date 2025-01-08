@@ -60,7 +60,6 @@
                     <hr />
                     @if (isAuth)
                     {
-
                         <div class="btn-group dropdown-center">
                             <a class="btn btn-primary" asp-area="" asp-controller="User" asp-action="Details" asp-route-id="@currectUser.Id">
                                 @if (currectUser.ProfilePicture != null)
@@ -90,6 +89,7 @@
                             Ввійти
                         </a>
                     }
+                    <partial name="_LoginPartial" />
                 </div>
             </nav>
             <main role="main" class="pb-3 pt-3 col-md-9 ms-sm-auto col-lg-10 px-md-4">

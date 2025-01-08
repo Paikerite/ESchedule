@@ -1,10 +1,11 @@
 ﻿using ESchedule.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ESchedule.Data
 {
-    public class EScheduleDbContext : DbContext
+    public class EScheduleDbContext : IdentityDbContext<IdentityUser>
     {
         public EScheduleDbContext(DbContextOptions<EScheduleDbContext> options) : base(options)
         {

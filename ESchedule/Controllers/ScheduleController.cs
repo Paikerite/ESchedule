@@ -24,11 +24,12 @@ namespace ESchedule.Controllers
         }
 
         // GET: Schedule
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(IEnumerable<LessonViewModel> lessons)
         {
             var currectDate = DateTime.Now; //Normal date
 
-            var lessons = await lessonService.GetLessonsByDateAndName(currectDate, User.Identity.Name);
+            lessons ??= await lessonService.GetLessonsByDateAndName(currectDate, User.Identity.Name);
+
             ViewBag.Date = currectDate;
 
             if (lessons != null)
@@ -42,16 +43,34 @@ namespace ESchedule.Controllers
         }
 
         // POST: Schedule/{datebyuser}
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Index(DateTime datebyuser)
+        //{
+        //    var lessons = await lessonService.GetLessonsByDateAndName(datebyuser, User.Identity.Name);
+        //    ViewBag.Date = datebyuser;
+
+        //    if (lessons != null)
+        //    {
+        //        return View(lessons);
+        //    }
+        //    else
+        //    {
+        //        return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
+        //    }
+        //}
+
+        // POST: Schedule/{datebyuser}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(DateTime datebyuser)
+        public async Task<IActionResult> ChangeData(DateTime datebyuser)
         {
             var lessons = await lessonService.GetLessonsByDateAndName(datebyuser, User.Identity.Name);
             ViewBag.Date = datebyuser;
 
             if (lessons != null)
             {
-                return View(lessons);
+                return View("Index", lessons);
             }
             else
             {

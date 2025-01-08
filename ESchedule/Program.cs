@@ -2,6 +2,7 @@
 using ESchedule.Services;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -29,7 +30,11 @@ namespace ESchedule
 
             //https://learn.microsoft.com/ru-ru/ef/core/querying/single-split-queries
 
-            builder.Services.AddEndpointsApiExplorer();
+            //builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+            //    .AddEntityFrameworkStores<EScheduleDbContext>();
+
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<EScheduleDbContext>();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
@@ -42,15 +47,16 @@ namespace ESchedule
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClassService, ClassService>();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(option =>
-                {
-                    option.Cookie.HttpOnly = true;
-                    //option.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-                    option.SlidingExpiration = true;
-                    option.LoginPath = new PathString("/User/Login");
-                    option.AccessDeniedPath = new PathString("/User/NotHaveRights");
-                });
+            //builder.Services.AddAuthorization();
+            //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            //    .AddCookie(option =>
+            //    {
+            //        option.Cookie.HttpOnly = true;
+            //        //option.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+            //        option.SlidingExpiration = true;
+            //        option.LoginPath = new PathString("/User/Login");
+            //        option.AccessDeniedPath = new PathString("/User/NotHaveRights");
+            //    });
 
             builder.Services.AddSwaggerGen();
 
@@ -81,6 +87,8 @@ namespace ESchedule
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Schedule}/{action=Index}/{id?}"); //{controller=Home}/{action=Index}/{id?}
+
+            app.MapRazorPages();
 
             app.Run();
         }

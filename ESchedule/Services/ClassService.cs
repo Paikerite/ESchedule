@@ -42,7 +42,6 @@ namespace ESchedule.Services
             var response = await httpClient.DeleteAsync($"api/ClassWebAPI/{id}");
             if (response.IsSuccessStatusCode)
             {
-
                 return await response.Content.ReadFromJsonAsync<ClassViewModel>();
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)

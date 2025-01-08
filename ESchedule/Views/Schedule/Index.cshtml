@@ -20,7 +20,7 @@
             <div class="row mb-2">
                 <div class="col-md-4">
                     <label class="mb-2">Місяць та рік</label>
-                    <form id="datebyuserform" method="post"> @*asp-action="Calendar" *@
+                    <form id="datebyuserform" method="post" asp-controller="Schedule" asp-action="ChangeData"> @*asp-action="Calendar" *@
                         <div class="input-group">
                             <input class="form-control" type="date" name="datebyuser" value="@defaultValue" />
                             <button type="submit" class="btn btn-outline-secondary">Вибрати</button>
