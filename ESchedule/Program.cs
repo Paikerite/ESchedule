@@ -3,6 +3,7 @@ using ESchedule.Services;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -22,7 +23,8 @@ namespace ESchedule
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
 
-            builder.Services.AddDbContextPool<EScheduleDbContext>(options => {
+            builder.Services.AddDbContextPool<EScheduleDbContext>(options =>
+            {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
                 //options.EnableSensitiveDataLogging(true);
             }
@@ -33,8 +35,22 @@ namespace ESchedule
             //builder.Services.AddIdentityApiEndpoints<IdentityUser>()
             //    .AddEntityFrameworkStores<EScheduleDbContext>();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<EScheduleDbContext>();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddRazorPages();
+
+            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<ApplicationRole>()
+                .AddEntityFrameworkStores<EScheduleDbContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders()
+                .AddApiEndpoints();
+
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(opt =>
+            {
+                opt.DefaultScheme = IdentityConstants.ApplicationScheme;
+                opt.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            }).AddIdentityCookies();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
@@ -44,7 +60,7 @@ namespace ESchedule
 
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddScoped<ILessonService, LessonService>();
-            builder.Services.AddScoped<IUserService, UserService>();
+            //builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClassService, ClassService>();
 
             //builder.Services.AddAuthorization();
@@ -59,6 +75,7 @@ namespace ESchedule
             //    });
 
             builder.Services.AddSwaggerGen();
+            builder.Services.AddMemoryCache();
 
             var app = builder.Build();
 
@@ -75,6 +92,8 @@ namespace ESchedule
                 app.UseSwagger();
                 app.UseSwaggerUI();
             };
+
+            app.MapIdentityApi<ApplicationUser>();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

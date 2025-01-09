@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ESchedule.Data
 {
-    public class EScheduleDbContext : IdentityDbContext<IdentityUser>
+    public class EScheduleDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
         public EScheduleDbContext(DbContextOptions<EScheduleDbContext> options) : base(options)
         {
@@ -22,6 +22,6 @@ namespace ESchedule.Data
 
         public DbSet<ClassViewModel> Classes { get; set; } 
         public DbSet<LessonViewModel> Lessons { get; set; }
-        public DbSet<UserAccountViewModel> Users { get; set; }
+        //public DbSet<UserAccountViewModel> Users { get; set; }
     }
 }

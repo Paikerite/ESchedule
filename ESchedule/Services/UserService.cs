@@ -16,36 +16,38 @@ namespace ESchedule.Services
 
         public async Task<UserAccountViewModel> GetUserById(int id)
         {
-            if (eScheduleDbContext.Users == null)
-            {
-                return null;
-            }
+            //if (eScheduleDbContext.Users == null)
+            //{
+            //    return null;
+            //}
 
-            var userAccountViewModel = await eScheduleDbContext.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (userAccountViewModel == null)
-            {
-                return default(UserAccountViewModel);
-            }
+            //var userAccountViewModel = await eScheduleDbContext.Users
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+            //if (userAccountViewModel == null)
+            //{
+            //    return default(UserAccountViewModel);
+            //}
 
-            return userAccountViewModel;
+            //return userAccountViewModel;
+            return null;
         }
 
         public async Task<UserAccountViewModel> GetUserByEmail(string email)
         {
-            if (eScheduleDbContext.Users == null)
-            {
-                return null;
-            }
+            //if (eScheduleDbContext.Users == null)
+            //{
+            //    return null;
+            //}
 
-            var userAccountViewModel = await eScheduleDbContext.Users
-                .FirstOrDefaultAsync(m => m.Email == email);
-            if (userAccountViewModel == null)
-            {
-                return default(UserAccountViewModel);
-            }
+            //var userAccountViewModel = await eScheduleDbContext.Users
+            //    .FirstOrDefaultAsync(m => m.Email == email);
+            //if (userAccountViewModel == null)
+            //{
+            //    return default(UserAccountViewModel);
+            //}
 
-            return userAccountViewModel;
+            //return userAccountViewModel;
+            return null;
         }
     }
 }

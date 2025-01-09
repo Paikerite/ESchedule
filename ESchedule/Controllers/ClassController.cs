@@ -107,24 +107,24 @@ namespace ESchedule.Controllers
         [Authorize(Roles = "Student,Teacher")]
         public async Task<IActionResult> JoinClass([Bind("JoinCode")] JoinClassModel joinClass)
         {
-            if (ModelState.IsValid)
-            {
-                joinClass.UserName = User.Identity.Name;
-                var Class = await classService.GetClassByCodeJoin(joinClass.JoinCode);
+            //if (ModelState.IsValid)
+            //{
+            //    joinClass.UserName = User.Identity.Name;
+            //    var Class = await classService.GetClassByCodeJoin(joinClass.JoinCode);
 
-                if (Class != null)
-                {
-                    var currectUser = await userService.GetUserByEmail(joinClass.UserName);
-                    if (!Class.UsersAccount.Contains(currectUser))
-                    {
-                        await classService.AddUserToClassByCode(joinClass);
-                        return RedirectToAction(nameof(Index));
-                    }
-                    else ModelState.AddModelError("", "Не вдалося записатися на курс. Ви вже приєднані до цього курсу");
-                }
-                else ModelState.AddModelError("", "Не вдалося записатися на курс. Перевірьте код");
+            //    if (Class != null)
+            //    {
+            //        var currectUser = await userService.GetUserByEmail(joinClass.UserName);
+            //        if (!Class.UsersAccount.Contains(currectUser))
+            //        {
+            //            await classService.AddUserToClassByCode(joinClass);
+            //            return RedirectToAction(nameof(Index));
+            //        }
+            //        else ModelState.AddModelError("", "Не вдалося записатися на курс. Ви вже приєднані до цього курсу");
+            //    }
+            //    else ModelState.AddModelError("", "Не вдалося записатися на курс. Перевірьте код");
 
-            }
+            //}
             return View(joinClass);
         }
 

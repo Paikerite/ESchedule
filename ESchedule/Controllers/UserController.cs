@@ -65,24 +65,24 @@ namespace ESchedule.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([Bind("Email,Password")] LoginModel model)
         {
-            if (ModelState.IsValid)
-            {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-                if (user != null)
-                {
-                    if (user.IsConfirmEmail)
-                    {
-                        await Authenticate(model.Email, user.Role); // аутентификация
+            //if (ModelState.IsValid)
+            //{
+            //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
+            //    if (user != null)
+            //    {
+            //        if (user.IsConfirmEmail)
+            //        {
+            //            await Authenticate(model.Email, user.Role); // аутентификация
 
-                        return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
-                    }
-                    else
-                    {
-                        return RedirectToAction("MustConfirmEmail", new {UserId = user.Id});
-                    }
-                }
-                ModelState.AddModelError("", "Невірний логін і(або) пароль");
-            }
+            //            return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+            //        }
+            //        else
+            //        {
+            //            return RedirectToAction("MustConfirmEmail", new {UserId = user.Id});
+            //        }
+            //    }
+            //    ModelState.AddModelError("", "Невірний логін і(або) пароль");
+            //}
             return View(model);
         }
 
@@ -90,7 +90,7 @@ namespace ESchedule.Controllers
         public async Task<IActionResult> MustConfirmEmail(int UserId)
         {
             var user = await _context.Users.FindAsync(UserId);
-            await SendEmail(user);
+            //await SendEmail(user);
             return View(user);
         }
 
@@ -164,30 +164,30 @@ namespace ESchedule.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
-            if (userId == null || code == null)
-            {
-                return View("Error");
-            }
-            var user = await _context.Users.FindAsync(int.Parse(userId));
-            if (user == null)
-            {
-                return View("Error");
-            }
-            //var result = await _userManager.ConfirmEmailAsync(user, code);
-            if (Guid.Parse(code) == user.CodeToConfirmEmail)
-            {
-                user.IsConfirmEmail = true;
-                _context.Update(user);
-                await _context.SaveChangesAsync();
+            //if (userId == null || code == null)
+            //{
+            //    return View("Error");
+            //}
+            //var user = await _context.Users.FindAsync(int.Parse(userId));
+            //if (user == null)
+            //{
+            //    return View("Error");
+            //}
+            ////var result = await _userManager.ConfirmEmailAsync(user, code);
+            //if (Guid.Parse(code) == user.CodeToConfirmEmail)
+            //{
+            //    user.IsConfirmEmail = true;
+            //    _context.Update(user);
+            //    await _context.SaveChangesAsync();
 
-                await Authenticate(user.Email, user.Role);
-                return RedirectToAction("Index", "Schedule");
-            }
-            else
-            {
-                return View("Error");
-            }
-
+            //    await Authenticate(user.Email, user.Role);
+            //    return RedirectToAction("Index", "Schedule");
+            //}
+            //else
+            //{
+            //    return View("Error");
+            //}
+            return View();
         }
 
         // GET: User/Edit/5
