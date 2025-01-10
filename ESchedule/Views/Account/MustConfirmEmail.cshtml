@@ -1,0 +1,19 @@
+﻿@model ESchedule.Models.RegisterModel
+@{
+    ViewData["Title"] = "Підтвердження пошти";
+}
+
+<div class="container-fluid h-100 d-flex align-items-center justify-content-center">
+    <div class="card text-center">
+        <div class="card-header">
+            Підтвердження пошти
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Для завершення реєстрації, на вашу електронну пошту @Model.Email відправлено підтвердження</h5>
+            <form asp-action="MustConfirmEmail">
+                <input type="hidden" asp-for="Id" />
+                <input type="submit" value="Відправити ще раз" class="btn btn-primary" />
+            </form>
+        </div>
+    </div>
+</div>

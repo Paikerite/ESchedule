@@ -3,6 +3,7 @@ using ESchedule.Services;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -38,7 +39,15 @@ namespace ESchedule
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddRazorPages();
 
-            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddIdentityCore<ApplicationUser>(options => 
+            { 
+                options.SignIn.RequireConfirmedAccount = true;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 0;
+            })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<EScheduleDbContext>()
                 .AddSignInManager()
@@ -58,21 +67,10 @@ namespace ESchedule
                 BaseAddress = new Uri("https://localhost:7087/")
             });
 
-            builder.Services.AddTransient<IEmailService, EmailService>();
+            builder.Services.AddTransient<IEmailSender, EmailService>();
+            builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
             builder.Services.AddScoped<ILessonService, LessonService>();
-            //builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClassService, ClassService>();
-
-            //builder.Services.AddAuthorization();
-            //builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            //    .AddCookie(option =>
-            //    {
-            //        option.Cookie.HttpOnly = true;
-            //        //option.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-            //        option.SlidingExpiration = true;
-            //        option.LoginPath = new PathString("/User/Login");
-            //        option.AccessDeniedPath = new PathString("/User/NotHaveRights");
-            //    });
 
             builder.Services.AddSwaggerGen();
             builder.Services.AddMemoryCache();

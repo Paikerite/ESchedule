@@ -4,7 +4,7 @@ namespace ESchedule.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<UserAccountViewModel> GetUserByEmail (string email);
-        Task<UserAccountViewModel> GetUserById (int id);
+        Task<RegisterModel> GetUserByEmail (string email);
+        Task<RegisterModel> GetUserById (int id);
     }
 }

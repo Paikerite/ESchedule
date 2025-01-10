@@ -14,7 +14,7 @@ namespace ESchedule.Services
             this.eScheduleDbContext = eScheduleDbContext;
         }
 
-        public async Task<UserAccountViewModel> GetUserById(int id)
+        public async Task<RegisterModel> GetUserById(int id)
         {
             //if (eScheduleDbContext.Users == null)
             //{
@@ -32,7 +32,7 @@ namespace ESchedule.Services
             return null;
         }
 
-        public async Task<UserAccountViewModel> GetUserByEmail(string email)
+        public async Task<RegisterModel> GetUserByEmail(string email)
         {
             //if (eScheduleDbContext.Users == null)
             //{
