@@ -35,11 +35,12 @@ namespace ESchedule.Models
         //public Guid CodeToConfirmEmail { get; set; }
 
         [Required(ErrorMessage = "Не вказан пароль")]
-        [MinLength(6, ErrorMessage = "Мінімальна кількість символів - 6")]
-        [RegularExpression("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]+$", ErrorMessage = "Пароль не підходить, спробуйте інший")]
+        [StringLength(50, ErrorMessage = "Мінімальна кількість символів - 6, а максимальна - 50", MinimumLength = 6)]
+        //[RegularExpression("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]+$", ErrorMessage = "Пароль не підходить, спробуйте інший")]
         [DataType(DataType.Password)]
         public string? Password { get; set; }
 
+        [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Паролі не співпадають")]
         public string? ConfirmPassword { get;set; }
 

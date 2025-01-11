@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Підтвердження пошти";
+    string StatusMessage = (string)ViewBag.StatusMessage;
+}
+
+<div class="container-fluid h-100 d-flex align-items-center justify-content-center">
+    <div class="card text-center">
+        <div class="card-header">
+            @ViewData["Title"]
+        </div>
+        <div class="card-body">
+            <partial name="_StatusMessage" model="StatusMessage" />
+        </div>
+    </div>
+</div>

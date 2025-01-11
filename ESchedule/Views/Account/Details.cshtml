@@ -1,9 +1,13 @@
-﻿@model ESchedule.Models.RegisterModel
-@inject IUserService userService
+﻿@model ESchedule.Data.ApplicationUser
+@inject UserManager<ApplicationUser> userManager;
 
 @{
     ViewData["Title"] = "Інформація про акаунт";
-    var user = await userService.GetUserByEmail(User.Identity.Name);
+    ApplicationUser user = new();
+    if (User.Identity.IsAuthenticated)
+    {
+        user = await userManager.FindByEmailAsync(User.Identity.Name);
+    }
 }
 <div class="container">
     <div class="card mb-2 shadow-sm">
@@ -27,7 +31,7 @@
                 <div class="col-8">
                     <div class="card-text">
                         <p>ПІБ: @Model.Name @Model.SurName @Model.PatronymicName</p>
-                        <p>Роль у системі: @Model.Role.ToString();</p>
+                        @* <p>Роль у системі: @Model.Role.ToString();</p> *@
                         <p>Пошта: @Model.Email</p>
                     </div>
                 </div>

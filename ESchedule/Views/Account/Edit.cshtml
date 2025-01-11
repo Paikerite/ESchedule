@@ -1,4 +1,4 @@
-﻿@model ESchedule.Models.RegisterModel
+﻿@model ESchedule.Models.EditModel
 
 @{
     ViewData["Title"] = "Редагування профіля";
@@ -44,7 +44,7 @@
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
-                            <label asp-for="Password" class="control-label">Пароль</label>
+                            <label asp-for="Password" class="control-label">Підтвердіть пароль</label>
                             <input asp-for="Password" class="form-control" />
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>

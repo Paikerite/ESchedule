@@ -11,6 +11,11 @@ using Microsoft.AspNetCore.Identity;
 using ESchedule.Services;
 using ESchedule.Services.Interfaces;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text.Encodings.Web;
+using System.Text;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared;
 
 namespace ESchedule.Controllers
 {
@@ -19,13 +24,15 @@ namespace ESchedule.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly IEmailService emailService;
+        private readonly ILogger<LoginModel> logger;
+        private readonly EmailService emailService;
 
-        public AccountController(EScheduleDbContext context, IEmailService emailService, UserManager<ApplicationUser> _userManager, SignInManager<ApplicationUser> _signInManager)
+        public AccountController(EScheduleDbContext context, EmailService emailService, UserManager<ApplicationUser> _userManager, SignInManager<ApplicationUser> _signInManager, ILogger<LoginModel> logger)
         {
             this.emailService = emailService;
             userManager = _userManager;
             signInManager = _signInManager;
+            this.logger = logger;
         }
 
         // GET: User
@@ -39,16 +46,15 @@ namespace ESchedule.Controllers
         // GET: User/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Users == null)
+            if (id == null || userManager.Users == null)
             {
                 return NotFound();
             }
 
-            var userAccountViewModel = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var userAccountViewModel = await userManager.FindByIdAsync(id.ToString());
             if (userAccountViewModel == null)
             {
-                return NotFound();
+                return NotFound("Юзер заданого id не знайдений");
             }
 
             return View(userAccountViewModel);
@@ -56,41 +62,43 @@ namespace ESchedule.Controllers
 
         // GET: User/Login
         [AllowAnonymous]
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([Bind("Email,Password,RememberMe")] LoginModel model)
+        public async Task<IActionResult> Login([Bind("Email,Password,RememberMe")] LoginModel model, string? returnUrl = null)
         {
-            //if (ModelState.IsValid)
-            //{
-            //    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-            //    if (user != null)
-            //    {
-            //        if (user.IsConfirmEmail)
-            //        {
-            //            await Authenticate(model.Email, user.Role); // аутентификация
-
-            //            return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
-            //        }
-            //        else
-            //        {
-            //            return RedirectToAction("MustConfirmEmail", new {UserId = user.Id});
-            //        }
-            //    }
-            //    ModelState.AddModelError("", "Невірний логін і(або) пароль");
-            //}
             if (ModelState.IsValid)
             {
+                // This doesn't count login failures towards account lockout
+                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await signInManager.PasswordSignInAsync(model.Email!, model.Password!, model.RememberMe, false);
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                    logger.LogInformation("User logged in.");
+                    if (returnUrl is null)
+                    {
+                        return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                    }
+                    else
+                    {
+                        return LocalRedirect(returnUrl);
+                    }
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    return RedirectToAction("LoginWith2fa", new { ReturnUrl = returnUrl, model.RememberMe });
+                }
+                if (result.IsLockedOut)
+                {
+                    logger.LogWarning("User account locked out.");
+                    return RedirectToAction("Lockout");
                 }
 
                 ModelState.AddModelError("", "Невдала спроба ввійти");
@@ -99,11 +107,37 @@ namespace ESchedule.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> MustConfirmEmail(int UserId)
+        public async Task<IActionResult> MustConfirmEmail(int Id, string? returnUrl = null)
         {
-            var user = await _context.Users.FindAsync(UserId);
-            //await SendEmail(user);
+            var user = await userManager.FindByIdAsync(Id.ToString());
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+            await SendEmail(user, returnUrl);
             return View(user);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                //return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                return View("Bad userID or code");
+            }
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound($"Не вдалося завантажити юзера з таким ID '{userId}'.");
+            }
+
+            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+            var result = await userManager.ConfirmEmailAsync(user, code);
+            var StatusMessage = result.Succeeded ? "Дякую за підтвердження пошти!" : "Error. Сталося помилка під час підтвердження пошти";
+            ViewBag.StatusMessage = StatusMessage;
+            return View();
         }
 
         // GET: User/Create
@@ -119,41 +153,9 @@ namespace ESchedule.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Create(IFormFile fileAvatar, [Bind("Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password,ConfirmPassword")] RegisterModel userAccountViewModel)
+        public async Task<IActionResult> Create(IFormFile fileAvatar, [Bind("Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password,ConfirmPassword")] RegisterModel userAccountViewModel, string? returnUrl = null)
         {
-            //if (ModelState.IsValid)
-            //{
-            //    var userIsExist = await _context.Users.AnyAsync(a => a.Email == userAccountViewModel.Email);
-            //    if (userIsExist == false)
-            //    {
-            //        try
-            //        {
-            //            userAccountViewModel.IsConfirmEmail = false;
-            //            var pathToImage = await UploadFile(fileAvatar);
-
-            //            userAccountViewModel.ProfilePicture = pathToImage;
-            //            _context.Add(userAccountViewModel);
-            //            await _context.SaveChangesAsync();
-
-            //            await SendEmail(userAccountViewModel);
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
-            //            return View(userAccountViewModel);
-            //        }
-            //        return Content("Для завершення реєстрації перевірте електронну пошту та перейдіть за посиланням, вказаним у листі.");
-
-            //        //await Authenticate(userAccountViewModel.Email, userAccountViewModel.Role);
-
-            //        //return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
-            //    }
-            //    else
-            //    {
-            //        ModelState.AddModelError("", "Акаунт з цією поштою вже існує");
-            //    }
-            //}
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 string? pathToImage = string.Empty;
 
@@ -170,7 +172,7 @@ namespace ESchedule.Controllers
                 ApplicationUser user = new ApplicationUser()
                 {
                     Name = userAccountViewModel.Name!,
-                    SurName= userAccountViewModel.SurName!,
+                    SurName = userAccountViewModel.SurName!,
                     PatronymicName = userAccountViewModel.PatronymicName!,
                     ProfilePicture = pathToImage,
                     Email = userAccountViewModel.Email!,
@@ -181,8 +183,22 @@ namespace ESchedule.Controllers
 
                 if (result.Succeeded)
                 {
-                    await signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                    logger.LogInformation("User created a new account with password.");
+
+                    await SendEmail(user, returnUrl);
+
+                    if (userManager.Options.SignIn.RequireConfirmedAccount)
+                    {
+                        return RedirectToAction("MustConfirmEmail", new { email = userAccountViewModel.Email, returnUrl = returnUrl });
+                    }
+                    else
+                    {
+                        await signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
+
+                    //await signInManager.SignInAsync(user, isPersistent: false);
+                    //return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
                 }
                 foreach (var item in result.Errors)
                 {
@@ -192,50 +208,19 @@ namespace ESchedule.Controllers
             return View(userAccountViewModel);
         }
 
-        public async Task SendEmail(RegisterModel userAccountViewModel)
+        public async Task SendEmail(ApplicationUser user, string? returnUrl)
         {
-            //var code = Guid.NewGuid();
-            //userAccountViewModel.CodeToConfirmEmail = code;
-            //_context.Update(userAccountViewModel);
-            //await _context.SaveChangesAsync();
-            //// генерация токена для пользователя
-            //var callbackUrl = Url.Action(
-            //    "ConfirmEmail",
-            //    "User",
-            //    new { userId = userAccountViewModel.Id, code },
-            //    protocol: HttpContext.Request.Scheme);
-            ////EmailService emailService = new EmailService();
-            //await emailService.SendEmailAsync(userAccountViewModel.Email, $"{userAccountViewModel.Name} {userAccountViewModel.SurName}", "Confirm your account",
-            //    $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
-        }
+            var userId = await userManager.GetUserIdAsync(user);
+            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = Url.Page(
+                "/Account/ConfirmEmail",
+                pageHandler: null,
+                values: new { area = "Account", userId = userId, code = code, returnUrl = returnUrl },
+                protocol: Request.Scheme);
 
-        [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
-        {
-            //if (userId == null || code == null)
-            //{
-            //    return View("Error");
-            //}
-            //var user = await _context.Users.FindAsync(int.Parse(userId));
-            //if (user == null)
-            //{
-            //    return View("Error");
-            //}
-            ////var result = await _userManager.ConfirmEmailAsync(user, code);
-            //if (Guid.Parse(code) == user.CodeToConfirmEmail)
-            //{
-            //    user.IsConfirmEmail = true;
-            //    _context.Update(user);
-            //    await _context.SaveChangesAsync();
-
-            //    await Authenticate(user.Email, user.Role);
-            //    return RedirectToAction("Index", "Schedule");
-            //}
-            //else
-            //{
-            //    return View("Error");
-            //}
-            return View();
+            await emailService.SendEmailAsync(user.Email, "Підтвердити пошту",
+                $"Будь ласка, підтвердіть пошту: <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>натисніть тут</a>.");
         }
 
         // GET: User/Edit/5
@@ -243,18 +228,26 @@ namespace ESchedule.Controllers
         {
             if (id == null || userManager.Users == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             var accountUser = await userManager.FindByIdAsync(id.ToString());
-            //var accountUser = await userManager.Users.Where(u=>u.Id == id)
-            //    .FirstOrDefaultAsync();
-
             if (accountUser == null)
             {
-                return NotFound();
+                return NotFound("Юзер заданого id не знайдений");
             }
-            return View(accountUser);
+
+            EditModel editModel = new EditModel() 
+            {
+                Id=accountUser.Id,
+                Name =accountUser.Name,
+                SurName = accountUser.SurName,
+                PatronymicName = accountUser.PatronymicName,
+                Email = accountUser.Email,
+                ProfilePicture = accountUser.ProfilePicture,
+            };
+
+            return View(editModel);
         }
 
         // POST: User/Edit/5
@@ -262,68 +255,48 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password,CodeToConfirmEmail")] RegisterModel userAccountViewModel)
+        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,,CodeToConfirmEmail")] EditModel editModel)
         {
-            if (id != userAccountViewModel.Id)
+            if (id != editModel.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    //var profilePicture = await _context.Users.FindAsync(id);
+                var user = await userManager.FindByIdAsync(id.ToString());
+                var result = await signInManager.CheckPasswordSignInAsync(user!, editModel.Password!, false);
 
-                    var pathToImage = await UploadFile(fileAvatar);
-                    if (pathToImage != null && userAccountViewModel.ProfilePicture != null)
+                if (result.Succeeded)
+                {
+                    try
                     {
-                        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", userAccountViewModel.ProfilePicture);
-                        System.IO.File.Delete(path);
+                        var pathToImage = await UploadFile(fileAvatar);
+                        if (pathToImage != null && editModel.ProfilePicture != null)
+                        {
+                            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", editModel.ProfilePicture);
+                            System.IO.File.Delete(path);
+                        }
+                        editModel.ProfilePicture = pathToImage;
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
+                        return View(editModel);
                     }
 
-                    userAccountViewModel.ProfilePicture = pathToImage;
-
-                    _context.Update(userAccountViewModel);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserAccountViewModelExists(userAccountViewModel.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
-                    return View(userAccountViewModel);
+                    user.Name = editModel.Name;
+                    user.SurName = editModel.SurName;
+                    user.PatronymicName = editModel.PatronymicName;
+                    user.ProfilePicture = editModel.ProfilePicture;
+                    user.Email = editModel.Email;
+                    //TODO!!!!
+                    var resultupdate = await userManager.UpdateAsync(user);
+                    await signInManager.RefreshSignInAsync(user);
                 }
                 return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
             }
-            return View(userAccountViewModel);
-        }
-
-        // GET: User/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Users == null)
-            {
-                return NotFound();
-            }
-
-            var userAccountViewModel = await _context.Users
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (userAccountViewModel == null)
-            {
-                return NotFound();
-            }
-
-            return View(userAccountViewModel);
+            return View(editModel);
         }
 
         //GET: User/NotHaveRights
@@ -332,44 +305,57 @@ namespace ESchedule.Controllers
             return View();
         }
 
+        // GET: User/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null || userManager.Users == null)
+            {
+                return NotFound();
+            }
+
+            var userAccountViewModel = await userManager.FindByIdAsync(id.ToString());
+            if (userAccountViewModel == null)
+            {
+                return NotFound("Юзер заданого id не знайдений");
+            }
+
+            return View(new InputPasswordModel { Id = userAccountViewModel.Id, Name = userAccountViewModel.Name});
+        }
+
         // POST: User/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed([Bind("Id,Name,Password")] InputPasswordModel model)
         {
-            if (_context.Users == null)
+            if (userManager.Users == null)
             {
-                return Problem("Entity set 'EScheduleDbContext.Users'  is null.");
+                return NotFound();
             }
-            var userAccountViewModel = await _context.Users.FindAsync(id);
-            if (userAccountViewModel != null)
+            var user = await userManager.FindByIdAsync(model.Id.ToString());
+            if (user == null)
             {
-                _context.Users.Remove(userAccountViewModel);
+                return NotFound("Юзер заданого id не знайдений");
             }
 
-            await _context.SaveChangesAsync();
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!await userManager.CheckPasswordAsync(user, model.Password))
+            {
+                ModelState.AddModelError(string.Empty, "Невірно введений пароль.");
+                return View();
+            }
+
+            var result = await userManager.DeleteAsync(user);
+            var userId = await userManager.GetUserIdAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Трапилась помилка під час видалення юзера {userId}");
+            }
+
+            await signInManager.SignOutAsync();
+
+            logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);
+
             return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
         }
-
-        private bool UserAccountViewModelExists(int id)
-        {
-            return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
-
-        //private async Task Authenticate(string userName, Roles roles)
-        //{
-        //    // создаем один claim
-        //    var claims = new List<Claim>
-        //    {
-        //        new Claim(ClaimsIdentity.DefaultNameClaimType, userName),
-        //        new Claim(ClaimsIdentity.DefaultRoleClaimType, roles.ToString())
-        //    };
-        //    // создаем объект ClaimsIdentity
-        //    ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-        //    // установка аутентификационных куки
-        //    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-        //}
 
         public async Task<IActionResult> Logout()
         {
