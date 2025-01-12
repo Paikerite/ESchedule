@@ -15,7 +15,7 @@
             <div class="card-body">
                 <div class="row">
                     <form asp-action="Edit" enctype="multipart/form-data">
-                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="ProfilePicture" />
                         <div class="mb-3">

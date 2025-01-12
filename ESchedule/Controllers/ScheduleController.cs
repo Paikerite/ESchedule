@@ -2,11 +2,8 @@
 using ESchedule.Models;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Threading.Channels;
-using Microsoft.Extensions.Logging.EventSource;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+using ESchedule.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace ESchedule.Controllers
 {
@@ -14,13 +11,13 @@ namespace ESchedule.Controllers
     {
         private readonly ILessonService lessonService;
         private readonly IClassService classService;
-        private readonly IUserService userService;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public ScheduleController(ILessonService lessonService, IClassService classService, IUserService userService)
+        public ScheduleController(ILessonService lessonService, IClassService classService, UserManager<ApplicationUser> userManager)
         {
             this.lessonService = lessonService;
             this.classService = classService;
-            this.userService = userService;
+            this.userManager = userManager;
         }
 
         // GET: Schedule
@@ -150,7 +147,7 @@ namespace ESchedule.Controllers
         public async Task<IActionResult> Edit(int? id, string userName)
         {
 
-            var user = await userService.GetUserByEmail(userName);
+            var user = await userManager.FindByNameAsync(userName);
 
             if (user == null)
             {

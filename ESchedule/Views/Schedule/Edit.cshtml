@@ -1,11 +1,11 @@
 ﻿@model ESchedule.Models.EditAddLessonModel
 @inject IClassService classService
-@inject IUserService userService
+@inject UserManager<ApplicationUser> userManager;
 
 @{
     ViewData["Title"] = "Редагування урока";
 
-    var currectUser = await userService.GetUserByEmail(User.Identity.Name);
+    var currectUser = await userManager.FindByNameAsync(User.Identity.Name);
     var availableClasses = await classService.GetClassesByAdminId(currectUser.Id);
 
     var selectList = new SelectList(availableClasses, nameof(ClassViewModel.Id), nameof(ClassViewModel.Name));

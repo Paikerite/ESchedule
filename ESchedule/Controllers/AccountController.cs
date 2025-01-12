@@ -1,21 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ESchedule.Data;
 using ESchedule.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
-using ESchedule.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using ESchedule.Services;
-using ESchedule.Services.Interfaces;
-using System.ComponentModel;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Encodings.Web;
 using System.Text;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared;
 
 namespace ESchedule.Controllers
 {
@@ -290,7 +282,7 @@ namespace ESchedule.Controllers
                     user.PatronymicName = editModel.PatronymicName;
                     user.ProfilePicture = editModel.ProfilePicture;
                     user.Email = editModel.Email;
-                    //TODO!!!!
+
                     var resultupdate = await userManager.UpdateAsync(user);
                     await signInManager.RefreshSignInAsync(user);
                 }
@@ -389,6 +381,95 @@ namespace ESchedule.Controllers
             await fileAvatar.OpenReadStream().CopyToAsync(fs, maxFileSize);
 
             return relativePath;
+        }
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        public IActionResult ForgotPasswordConfirmation() 
+        {
+            return View();
+        }
+
+        [HttpPost, ActionName("ForgotPasswordPost")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword([Bind("Email")] ForgotPasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByEmailAsync(model.Email);
+                if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+                {
+                    // Don't reveal that the user does not exist or is not confirmed
+                    return RedirectToAction("ForgotPasswordConfirmation");
+                }
+
+                // For more information on how to enable account confirmation and password reset please
+                // visit https://go.microsoft.com/fwlink/?LinkID=532713
+                var code = await userManager.GeneratePasswordResetTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                var callbackUrl = Url.Page(
+                    "/Account/ResetPassword",
+                    pageHandler: null,
+                    values: new { area = "Account", code },
+                    protocol: Request.Scheme);
+
+                await emailService.SendEmailAsync(
+                    model.Email,
+                    "Скидання паролю",
+                    $"Будь ласка, виконайте скидання <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>натисніть тут</a>.");
+
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+
+            return View();
+        }
+
+        public IActionResult ResetPassword(string code = null)
+        {
+            if (code == null)
+            {
+                return BadRequest("A code must be supplied for password reset.");
+            }
+            else
+            {
+                ResetPasswordModel input = new ResetPasswordModel
+                {
+                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code))
+                };
+                return View(input);
+            }
+        }
+
+        [HttpPost, ActionName("ResetPasswordPost")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword([Bind("Email, Password, ConfirmPassword, Code")] ResetPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+
+            var result = await userManager.ResetPasswordAsync(user, model.Code, model.Password);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View();
         }
     }
 }
