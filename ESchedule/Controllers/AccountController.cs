@@ -8,6 +8,8 @@ using ESchedule.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Encodings.Web;
 using System.Text;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using ESchedule.Models.Enums;
 
 namespace ESchedule.Controllers
 {
@@ -16,15 +18,19 @@ namespace ESchedule.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly ILogger<LoginModel> logger;
-        private readonly EmailService emailService;
+        private readonly RoleManager<ApplicationRole> roleManager;
+        private readonly ILogger<AccountController> logger;
+        private readonly IEmailSender emailService;
 
-        public AccountController(EScheduleDbContext context, EmailService emailService, UserManager<ApplicationUser> _userManager, SignInManager<ApplicationUser> _signInManager, ILogger<LoginModel> logger)
+        private string[] validExtensionsForUpload = [ ".png", ".jpg", ".jpeg" ];
+
+        public AccountController(EScheduleDbContext context, IEmailSender emailService, UserManager<ApplicationUser> _userManager, SignInManager<ApplicationUser> _signInManager, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager)
         {
             this.emailService = emailService;
             userManager = _userManager;
             signInManager = _signInManager;
             this.logger = logger;
+            this.roleManager = roleManager;
         }
 
         // GET: User
@@ -145,8 +151,13 @@ namespace ESchedule.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
-        public async Task<IActionResult> Create(IFormFile fileAvatar, [Bind("Name,SurName,PatronymicName,ProfilePicture,Role,Email,Password,ConfirmPassword")] RegisterModel userAccountViewModel, string? returnUrl = null)
+        public async Task<IActionResult> Create(IFormFile fileAvatar, [Bind("Name,SurName,PatronymicName,Role,Email,Password,ConfirmPassword")] RegisterModel userAccountViewModel, string? returnUrl = null)
         {
+            if (fileAvatar is null)
+            {
+                ModelState.AddModelError("", "Завантажьте аватар");
+            }
+
             if (ModelState.IsValid)
             {
                 string? pathToImage = string.Empty;
@@ -168,6 +179,7 @@ namespace ESchedule.Controllers
                     PatronymicName = userAccountViewModel.PatronymicName!,
                     ProfilePicture = pathToImage,
                     Email = userAccountViewModel.Email!,
+                    UserName = userAccountViewModel.Email!,
                     //Role = userAccountViewModel.Role,
                 };
 
@@ -176,6 +188,23 @@ namespace ESchedule.Controllers
                 if (result.Succeeded)
                 {
                     logger.LogInformation("User created a new account with password.");
+                    var resultRole = await roleManager.FindByNameAsync(userAccountViewModel.Role.ToString());
+
+                    IdentityResult identityResultRole;
+                    if (resultRole is null)
+                    {
+                        logger.LogError($"Fail to find role {userAccountViewModel.Role.ToString()}, adding user to role Student");
+                        identityResultRole = await userManager.AddToRoleAsync(user, Roles.Student.ToString());
+                    }
+                    else
+                    {
+                        identityResultRole = await userManager.AddToRoleAsync(user, resultRole.Name);
+                        if (!identityResultRole.Succeeded)
+                        {
+                            logger.LogError($"Fail to add user to role {userAccountViewModel.Role.ToString()}, adding user to role Student");
+                            identityResultRole = await userManager.AddToRoleAsync(user, Roles.Student.ToString());
+                        }
+                    }
 
                     await SendEmail(user, returnUrl);
 
@@ -229,14 +258,18 @@ namespace ESchedule.Controllers
                 return NotFound("Юзер заданого id не знайдений");
             }
 
-            EditModel editModel = new EditModel() 
+            var userRole = await userManager.GetRolesAsync(accountUser);
+            var identityRole = await roleManager.FindByNameAsync(userRole[0]);
+
+            EditModel editModel = new EditModel()
             {
-                Id=accountUser.Id,
-                Name =accountUser.Name,
+                Id = accountUser.Id,
+                Name = accountUser.Name,
                 SurName = accountUser.SurName,
                 PatronymicName = accountUser.PatronymicName,
                 Email = accountUser.Email,
                 ProfilePicture = accountUser.ProfilePicture,
+                Role = identityRole.RoleEnum,
             };
 
             return View(editModel);
@@ -247,7 +280,7 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,ProfilePicture,Role,Email,,CodeToConfirmEmail")] EditModel editModel)
+        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,Role,Email,CodeToConfirmEmail")] EditModel editModel)
         {
             if (id != editModel.Id)
             {
@@ -275,6 +308,27 @@ namespace ESchedule.Controllers
                     {
                         ModelState.AddModelError("", $"Помилка на сервері - {ex.Message}");
                         return View(editModel);
+                    }
+
+                    var resultRoleFromEdit = await roleManager.FindByNameAsync(editModel.Role.ToString());
+                    var resultsRolesFromUser = await userManager.GetRolesAsync(user);
+                    var resultRoleFromUser = await roleManager.FindByNameAsync(resultsRolesFromUser[0]);
+
+                    if (resultRoleFromEdit != resultRoleFromUser)
+                    {
+                        IdentityResult identityResultRole;
+                        var resultRemove = await userManager.RemoveFromRoleAsync(user, resultRoleFromUser.Name);
+                        if (!resultRemove.Succeeded)
+                        {
+                            ModelState.AddModelError("", "Fail to remove user from Role");
+                            return View(editModel);
+                        }
+                        var resultAdd = await userManager.AddToRoleAsync(user, resultRoleFromEdit.Name);
+                        if (!resultAdd.Succeeded)
+                        {
+                            logger.LogError($"Fail to add user to role {resultRoleFromEdit.Name}, adding user to role Student");
+                            identityResultRole = await userManager.AddToRoleAsync(user, Roles.Student.ToString());
+                        }
                     }
 
                     user.Name = editModel.Name;
@@ -311,7 +365,7 @@ namespace ESchedule.Controllers
                 return NotFound("Юзер заданого id не знайдений");
             }
 
-            return View(new InputPasswordModel { Id = userAccountViewModel.Id, Name = userAccountViewModel.Name});
+            return View(new InputPasswordModel { Id = userAccountViewModel.Id, Name = userAccountViewModel.Name });
         }
 
         // POST: User/Delete/5
@@ -365,10 +419,18 @@ namespace ESchedule.Controllers
             {
                 throw new Exception("Файл занадто великого розміру, максимум 10 mb");
             }
+
+            string extension = Path.GetExtension(fileAvatar.FileName);
+
+            if (!validExtensionsForUpload.Contains(extension))
+            {
+                throw new Exception($"Данний формат файла не підтримується, дозволяється: {string.Join(",", validExtensionsForUpload)}");
+            }
+
             string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "AvatarsImages");
 
             string newFileName = Path.ChangeExtension(Path.GetRandomFileName(),
-                                                      Path.GetExtension(fileAvatar.FileName));
+                                                      extension);
 
             if (!Directory.Exists(path))
             {
@@ -388,7 +450,7 @@ namespace ESchedule.Controllers
             return View();
         }
 
-        public IActionResult ForgotPasswordConfirmation() 
+        public IActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
@@ -471,5 +533,35 @@ namespace ESchedule.Controllers
             }
             return View();
         }
+
+        //[AllowAnonymous]
+        //public async Task<IActionResult> TestCreat()
+        //{
+        //    IdentityResult result = await roleManager.CreateAsync(new ApplicationRole { RoleName = "Студент", Name= "Student", Description= "Студент, людина яка навчається і знає кому давати хабар" });
+        //    if (result.Succeeded)
+        //    {
+        //        IdentityResult result1 = await roleManager.CreateAsync(new ApplicationRole { RoleName = "Вчитель", Name = "Teacher", Description = "Вчитель, людина яка навчає і знає з кого брати хабар" });
+        //        if (result.Succeeded)
+        //        {
+        //            return RedirectToAction("Index");
+        //        }
+        //        else
+        //        {
+        //            foreach (var error in result.Errors)
+        //            {
+        //                logger.LogWarning(error.Description);
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        foreach (var error in result.Errors)
+        //        {
+        //            logger.LogWarning(error.Description);
+        //        }
+        //    }
+
+        //    return View();
+        //}
     }
 }

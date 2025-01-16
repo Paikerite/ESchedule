@@ -1,15 +1,15 @@
 ﻿@inject IAuthorizationService AuthorizationService
-@inject IUserService UserService
+@inject UserManager<ApplicationUser> userManager
 
 @{
-    var isAuth = User.Identity.IsAuthenticated;
+    // var isAuth = User.Identity.IsAuthenticated;
 
-    var currectUser = new RegisterModel();
+    // var currectUser = new ApplicationUser();
 
-    if (isAuth)
-    {
-        currectUser = await UserService.GetUserByEmail(User.Identity.Name);
-    }
+    // if (isAuth)
+    // {
+    //     currectUser = await userManager.FindByNameAsync(User.Identity.Name);
+    // }
 }
 
 <!DOCTYPE html>

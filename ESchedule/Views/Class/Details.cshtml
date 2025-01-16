@@ -1,10 +1,10 @@
 ﻿@model ESchedule.Models.ClassViewModel
-@inject IUserService userService
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Курс";
-    var user = await userService.GetUserByEmail(User.Identity.Name);
-    var userCreator = await userService.GetUserById(Model.IdUserAdmin);
+    var user = await userManager.FindByNameAsync(User.Identity.Name);
+    var userCreator = await userManager.FindByIdAsync(Model.IdUserAdmin.ToString());
 }
 
 <div class="container">

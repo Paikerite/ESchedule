@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ESchedule.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace ESchedule.Data
 {
@@ -7,5 +8,6 @@ namespace ESchedule.Data
         // Дополнительные свойства для роли
         public string? Description { get; set; }
         public string? RoleName { get; set; }
+        public Roles RoleEnum { get; set; }
     }
 }

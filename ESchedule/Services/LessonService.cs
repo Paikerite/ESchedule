@@ -2,7 +2,6 @@
 using ESchedule.Services.Interfaces;
 using Newtonsoft.Json;
 using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ESchedule.Services
 {

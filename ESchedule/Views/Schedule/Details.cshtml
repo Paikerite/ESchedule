@@ -1,13 +1,13 @@
 ﻿@using System.Globalization;
 @model ESchedule.Models.LessonViewModel
-@inject IUserService userService
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Деталь уроку";
     CultureInfo cultureUa = new CultureInfo("uk-UA");
     string nameOfWeek = Model.DayTime.ToString("ddd", cultureUa);
-    var user = await userService.GetUserByEmail(User.Identity.Name);
-    var userCreator = await userService.GetUserById(Model.Classes[0].IdUserAdmin);
+    var user = await userManager.FindByNameAsync(User.Identity.Name);
+    var userCreator = await userManager.FindByIdAsync(Model.Classes[0].IdUserAdmin.ToString());
 }
 
 

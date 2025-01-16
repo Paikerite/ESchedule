@@ -34,9 +34,8 @@
                             <span asp-validation-for="PatronymicName" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
-                            <label asp-for="ProfilePicture" class="control-label">Зображення профіля</label>
-                            <input type="file" name="fileAvatar" accept="image/*" asp-for="ProfilePicture" class="form-control" />
-                            <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                            <label class="control-label">Зображення профіля</label>
+                            <input type="file" name="fileAvatar" accept=".png, .jpeg, .jpg" class="form-control" />
                         </div>
                         <h4 class="mb-3">Роль</h4>
                         <div class="my-3">

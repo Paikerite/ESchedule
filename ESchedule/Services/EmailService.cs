@@ -1,9 +1,7 @@
-﻿using ESchedule.Services.Interfaces;
-using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using SendGrid.Helpers.Mail;
 using SendGrid;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace ESchedule.Services
 {
@@ -11,7 +9,7 @@ namespace ESchedule.Services
     {
         private readonly ILogger _logger;
 
-        public EmailService(IOptions<AuthMessageSenderOptions> optionsAccessor, ILogger logger)
+        public EmailService(IOptions<AuthMessageSenderOptions> optionsAccessor, ILogger<EmailService> logger)
         {
             Options = optionsAccessor.Value;
             _logger = logger;

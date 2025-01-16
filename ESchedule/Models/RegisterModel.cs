@@ -20,7 +20,7 @@ namespace ESchedule.Models
         [Required(ErrorMessage = "Не вказано прізвище по батькові")]
         public string? PatronymicName { get; set; }
 
-        public string? ProfilePicture { get; set; }
+        //public string ProfilePicture { get; set; }
 
         [Required(ErrorMessage = "Будь ласка, оберіть вашу роль в системі")]
         [EnumDataType(typeof(Roles), ErrorMessage = "Будь ласка, оберіть вашу роль в системі з переліку")]
@@ -29,10 +29,6 @@ namespace ESchedule.Models
         [Required(ErrorMessage = "Не вказан Email")]
         [DataType(DataType.EmailAddress)]
         public string? Email { get; set; }
-
-        //public bool IsConfirmEmail { get; set; }
-
-        //public Guid CodeToConfirmEmail { get; set; }
 
         [Required(ErrorMessage = "Не вказан пароль")]
         [StringLength(50, ErrorMessage = "Мінімальна кількість символів - 6, а максимальна - 50", MinimumLength = 6)]

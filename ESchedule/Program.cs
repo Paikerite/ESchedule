@@ -38,6 +38,7 @@ namespace ESchedule
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddRazorPages();
+            //builder.Services.AddLogging();
 
             builder.Services.AddIdentityCore<ApplicationUser>(options => 
             { 
@@ -47,6 +48,7 @@ namespace ESchedule
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 6;
                 options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireNonAlphanumeric = false;
             })
                 .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<EScheduleDbContext>()
@@ -67,6 +69,7 @@ namespace ESchedule
                 BaseAddress = new Uri("https://localhost:7087/")
             });
 
+            //builder.Services.AddScoped<ILogger>();
             builder.Services.AddTransient<IEmailSender, EmailService>();
             builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
             builder.Services.AddScoped<ILessonService, LessonService>();
