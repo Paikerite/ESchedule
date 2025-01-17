@@ -10,6 +10,7 @@ using System.Text.Encodings.Web;
 using System.Text;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ESchedule.Models.Enums;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ESchedule.Controllers
 {
@@ -22,13 +23,13 @@ namespace ESchedule.Controllers
         private readonly ILogger<AccountController> logger;
         private readonly IEmailSender emailService;
 
-        private string[] validExtensionsForUpload = [ ".png", ".jpg", ".jpeg" ];
+        private string[] validExtensionsForUpload = [".png", ".jpg", ".jpeg"];
 
-        public AccountController(EScheduleDbContext context, IEmailSender emailService, UserManager<ApplicationUser> _userManager, SignInManager<ApplicationUser> _signInManager, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager)
+        public AccountController(EScheduleDbContext context, IEmailSender emailService, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<AccountController> logger, RoleManager<ApplicationRole> roleManager)
         {
             this.emailService = emailService;
-            userManager = _userManager;
-            signInManager = _signInManager;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
             this.logger = logger;
             this.roleManager = roleManager;
         }
@@ -75,31 +76,57 @@ namespace ESchedule.Controllers
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await signInManager.PasswordSignInAsync(model.Email!, model.Password!, model.RememberMe, false);
-
-                if (result.Succeeded)
+                var user = await userManager.FindByNameAsync(model.Email);
+                if (user is null)
                 {
-                    logger.LogInformation("User logged in.");
-                    if (returnUrl is null)
-                    {
-                        return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
-                    }
-                    else
-                    {
-                        return LocalRedirect(returnUrl);
-                    }
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToAction("LoginWith2fa", new { ReturnUrl = returnUrl, model.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    logger.LogWarning("User account locked out.");
-                    return RedirectToAction("Lockout");
+                    ModelState.AddModelError("", "Невдала спроба ввійти, неправильний пароль або пошта");
+                    return View(model);
                 }
 
-                ModelState.AddModelError("", "Невдала спроба ввійти");
+                if (user.EmailConfirmed)
+                {
+                    var result = await signInManager.PasswordSignInAsync(model.Email!, model.Password!, model.RememberMe, false);
+                    if (result.Succeeded)
+                    {
+                        logger.LogInformation("User logged in.");
+                        if (returnUrl is null)
+                        {
+                            return RedirectToAction(nameof(ScheduleController.Index), "Schedule");
+                        }
+                        else
+                        {
+                            return LocalRedirect(returnUrl);
+                        }
+                    }
+
+                    if (result.RequiresTwoFactor)
+                    {
+                        return RedirectToAction("LoginWith2fa", new { ReturnUrl = returnUrl, model.RememberMe });
+                    }
+                    if (result.IsLockedOut)
+                    {
+                        logger.LogWarning("User account locked out.");
+                        return RedirectToAction("Lockout");
+                    }
+                }
+                else
+                {
+                    await SendEmail(user, returnUrl);
+                    return RedirectToAction("MustConfirmEmail", new { Id = user.Id, returnUrl = returnUrl });
+                }
+
+
+                //var user = await userManager.FindByNameAsync(model.Email!) ?? await userManager.FindByEmailAsync(model.Email!);
+
+                //var resultCheck = await userManager.CheckPasswordAsync(user, model.Email!);
+
+                //if (resultCheck)
+                //{
+                //    await signInManager.SignInAsync(user, model.RememberMe);
+                //}
+
+                //return StatusCode(StatusCodes.Status401Unauthorized, "Incorrect username or password");
+                ModelState.AddModelError("", "Невдала спроба ввійти, неправильний пароль або пошта");
             }
             return View(model);
         }
@@ -184,6 +211,8 @@ namespace ESchedule.Controllers
                 };
 
                 var result = await userManager.CreateAsync(user, userAccountViewModel.Password!);
+                await userManager.SetUserNameAsync(user, userAccountViewModel.Email);
+                await userManager.SetEmailAsync(user, userAccountViewModel.Email);
 
                 if (result.Succeeded)
                 {
@@ -210,7 +239,7 @@ namespace ESchedule.Controllers
 
                     if (userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToAction("MustConfirmEmail", new { email = userAccountViewModel.Email, returnUrl = returnUrl });
+                        return RedirectToAction("MustConfirmEmail", new { Id = user.Id, returnUrl = returnUrl });
                     }
                     else
                     {

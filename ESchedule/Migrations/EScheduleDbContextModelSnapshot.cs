@@ -34,7 +34,7 @@ namespace ESchedule.Migrations
 
                     b.HasIndex("UsersAccountId");
 
-                    b.ToTable("ApplicationUserClassViewModel", (string)null);
+                    b.ToTable("ApplicationUserClassViewModel");
                 });
 
             modelBuilder.Entity("ClassViewModelLessonViewModel", b =>
@@ -49,7 +49,7 @@ namespace ESchedule.Migrations
 
                     b.HasIndex("LessonsId");
 
-                    b.ToTable("ClassViewModelLessonViewModel", (string)null);
+                    b.ToTable("ClassViewModelLessonViewModel");
                 });
 
             modelBuilder.Entity("ESchedule.Data.ApplicationRole", b =>
@@ -74,6 +74,9 @@ namespace ESchedule.Migrations
                     b.Property<string>("NormalizedName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("RoleEnum")
+                        .HasColumnType("int");
 
                     b.Property<string>("RoleName")
                         .HasColumnType("nvarchar(max)");
@@ -205,7 +208,7 @@ namespace ESchedule.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Classes", (string)null);
+                    b.ToTable("Classes");
                 });
 
             modelBuilder.Entity("ESchedule.Models.LessonViewModel", b =>
@@ -243,7 +246,7 @@ namespace ESchedule.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Lessons", (string)null);
+                    b.ToTable("Lessons");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

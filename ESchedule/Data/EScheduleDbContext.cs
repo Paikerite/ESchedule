@@ -19,21 +19,21 @@ namespace ESchedule.Data
             //    .HasMany(e => e.UsersAccount)
             //    .WithMany(e => e.Classes);
 
-            modelBuilder.Entity<ApplicationRole>().HasData(new ApplicationRole
-            {
-                Id = 1,
-                RoleName = "Студент",
-                Name = "Student",
-                Description = "Студент, людина яка навчається і знає кому давати хабар"
-            });
+            //modelBuilder.Entity<ApplicationRole>().HasData(new ApplicationRole
+            //{
+            //    Id = 1,
+            //    RoleName = "Студент",
+            //    Name = "Student",
+            //    Description = "Студент, людина яка навчається і знає кому давати хабар"
+            //});
 
-            modelBuilder.Entity<ApplicationRole>().HasData(new ApplicationRole
-            {
-                Id = 2,
-                RoleName = "Вчитель",
-                Name = "Teacher",
-                Description = "Вчитель, людина яка навчає і знає з кого брати хабар"
-            });
+            //modelBuilder.Entity<ApplicationRole>().HasData(new ApplicationRole
+            //{
+            //    Id = 2,
+            //    RoleName = "Вчитель",
+            //    Name = "Teacher",
+            //    Description = "Вчитель, людина яка навчає і знає з кого брати хабар"
+            //});
         }
 
         public DbSet<ClassViewModel> Classes { get; set; } 
