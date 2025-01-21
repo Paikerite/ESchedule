@@ -14,7 +14,7 @@
     @if (signInManager.IsSignedIn(User))
     {
         <div class="btn-group dropdown-center">
-            <a class="btn btn-primary" asp-area="" asp-controller="User" asp-action="Details" asp-route-id="@CurrentUser.Id">
+            <a class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="Details" asp-route-id="@CurrentUser.Id">
                 @if (CurrentUser.ProfilePicture != null)
                 {
                     <img src="~/@CurrentUser.ProfilePicture" alt="" width="32" height="32" class="rounded-circle me-2">

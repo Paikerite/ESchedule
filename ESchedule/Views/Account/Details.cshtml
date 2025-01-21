@@ -4,9 +4,11 @@
 @{
     ViewData["Title"] = "Інформація про акаунт";
     ApplicationUser user = new();
+    IEnumerable<string> roleUser = Enumerable.Empty<string>();
     if (User.Identity.IsAuthenticated)
     {
         user = await userManager.FindByEmailAsync(User.Identity.Name);
+        roleUser = await userManager.GetRolesAsync(user);
     }
 }
 <div class="container">
@@ -31,7 +33,7 @@
                 <div class="col-8">
                     <div class="card-text">
                         <p>ПІБ: @Model.Name @Model.SurName @Model.PatronymicName</p>
-                        @* <p>Роль у системі: @Model.Role.ToString();</p> *@
+                        <p>Роль у системі: @roleUser.FirstOrDefault();</p>
                         <p>Пошта: @Model.Email</p>
                     </div>
                 </div>

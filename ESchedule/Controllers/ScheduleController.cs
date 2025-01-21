@@ -25,7 +25,7 @@ namespace ESchedule.Controllers
         {
             var currectDate = DateTime.Now; //Normal date
 
-            lessons ??= await lessonService.GetLessonsByDateAndName(currectDate, User.Identity.Name);
+            lessons = await lessonService.GetLessonsByDateAndName(currectDate, User.Identity.Name);
 
             ViewBag.Date = currectDate;
 

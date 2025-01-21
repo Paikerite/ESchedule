@@ -10,13 +10,13 @@
             Підтвердження видалення
         </div>
         <div class="card-body">
-            <h5 class="card-title">Ви впевнені що хочіте <a class="pe-none text-danger" tabindex="-1">видалити</a>свій акаунт @Model.Name</h5>
+            <h5 class="card-title">Ви впевнені що хочіте <a class="pe-none text-danger" tabindex="-1">видалити </a>свій акаунт @Model.Name</h5>
             <form asp-action="ForgotPasswordConfirmation" id="delete-user" method="post">
                 <div asp-validation-summary="All" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
                     <input type="hidden" asp-for="Id" />
                     <input asp-for="Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Будь ласка підтвердіть пароль." />
-                    <label asp-for="Password" class="form-label"></label>
+                    <label asp-for="Password" class="form-label">Пароль</label>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
                 <input type="submit" value="Видалити" class="btn btn-danger" />

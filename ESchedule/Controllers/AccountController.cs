@@ -309,11 +309,16 @@ namespace ESchedule.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,Name,SurName,PatronymicName,Role,Email,CodeToConfirmEmail")] EditModel editModel)
+        public async Task<IActionResult> Edit(IFormFile fileAvatar, int id, [Bind("Id,ProfilePicture,Name,SurName,PatronymicName,Role,Email,Password")] EditModel editModel)
         {
             if (id != editModel.Id)
             {
                 return BadRequest();
+            }
+
+            if (fileAvatar is null)
+            {
+                ModelState.AddModelError("", "Завантажьте аватар");
             }
 
             if (ModelState.IsValid)
