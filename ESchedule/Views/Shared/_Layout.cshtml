@@ -1,15 +1,15 @@
 ﻿@inject IAuthorizationService AuthorizationService
-@inject IUserService UserService
+@inject UserManager<ApplicationUser> userManager
 
 @{
-    var isAuth = User.Identity.IsAuthenticated;
+    // var isAuth = User.Identity.IsAuthenticated;
 
-    var currectUser = new UserAccountViewModel();
+    // var currectUser = new ApplicationUser();
 
-    if (isAuth)
-    {
-        currectUser = await UserService.GetUserByEmail(User.Identity.Name);
-    }
+    // if (isAuth)
+    // {
+    //     currectUser = await userManager.FindByNameAsync(User.Identity.Name);
+    // }
 }
 
 <!DOCTYPE html>
@@ -26,7 +26,7 @@
 <body style="background-color:#80c3c9">
     <div class="container-fluid">
         <div class="row">
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse flex-column" style="background-color:#0091ad; border-radius:0 0.375rem 0.375rem 0; height:150vh;">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse flex-column" style="background-color:#0091ad; border-radius:0 0.375rem 0.375rem 0; height:200vh;">
                 <div class="position-sticky pt-3 sidebar-sticky">
                     <a asp-area="" asp-controller="Schedule" asp-action="Index" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
                         <div class="hstack">
@@ -58,38 +58,7 @@
                         </li>
                     </ul>
                     <hr />
-                    @if (isAuth)
-                    {
-
-                        <div class="btn-group dropdown-center">
-                            <a class="btn btn-primary" asp-area="" asp-controller="User" asp-action="Details" asp-route-id="@currectUser.Id">
-                                @if (currectUser.ProfilePicture != null)
-                                {
-                                    <img src="~/@currectUser.ProfilePicture" alt="" width="32" height="32" class="rounded-circle me-2">
-                                }
-                                else
-                                {
-                                    <svg style="background-color:#fff4e4" width="32" height="32" class="rounded-circle me-2" />
-                                }
-                                @currectUser.SurName[0]. @currectUser.Name[0]. @currectUser.PatronymicName
-                            </a>
-                            <a href="#" class="d-flex align-items-center btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--bs-primary); border-color:var(--bs-primary); color:black;">
-                            </a>
-                            <ul class="dropdown-menu text-small shadow">
-                                <li><a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Edit" asp-route-id="@currectUser.Id">Налаштування</a></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Details" asp-route-id="@currectUser.Id">Профіль</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Logout">Вийти</a></li>
-                            </ul>
-
-                        </div>
-                    }
-                    else
-                    {
-                        <a asp-area="" asp-controller="User" asp-action="Login" class="d-flex align-items-center btn btn-primary" aria-expanded="false">
-                            Ввійти
-                        </a>
-                    }
+                    <partial name="_LoginPartial" />
                 </div>
             </nav>
             <main role="main" class="pb-3 pt-3 col-md-9 ms-sm-auto col-lg-10 px-md-4">

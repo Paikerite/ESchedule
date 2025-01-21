@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<ESchedule.Models.ClassViewModel>
-@inject IUserService userService
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Класи";
@@ -8,8 +8,8 @@
 
     if (userName != null)
     {
-        var currectUser = await userService.GetUserByEmail(userName);
-        currectIdUser = currectUser.Id;
+        // var currectUser = await userManager.GetUserByEmail(userName);
+        currectIdUser = int.Parse(userManager.GetUserId(User));
     }
 }
 

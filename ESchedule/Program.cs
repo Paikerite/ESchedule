@@ -2,6 +2,9 @@
 using ESchedule.Services;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -21,7 +24,8 @@ namespace ESchedule
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
 
-            builder.Services.AddDbContextPool<EScheduleDbContext>(options => {
+            builder.Services.AddDbContextPool<EScheduleDbContext>(options =>
+            {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
                 //options.EnableSensitiveDataLogging(true);
             }
@@ -29,7 +33,35 @@ namespace ESchedule
 
             //https://learn.microsoft.com/ru-ru/ef/core/querying/single-split-queries
 
+            //builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+            //    .AddEntityFrameworkStores<EScheduleDbContext>();
+
             builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddRazorPages();
+            //builder.Services.AddLogging();
+
+            builder.Services.AddIdentityCore<ApplicationUser>(options => 
+            { 
+                options.SignIn.RequireConfirmedAccount = true;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireNonAlphanumeric = false;
+            })
+                .AddRoles<ApplicationRole>()
+                .AddEntityFrameworkStores<EScheduleDbContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders()
+                .AddApiEndpoints();
+
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(opt =>
+            {
+                opt.DefaultScheme = IdentityConstants.ApplicationScheme;
+                opt.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            }).AddIdentityCookies();
 
             builder.Services.AddHttpClient();
             builder.Services.AddScoped(sp => new HttpClient
@@ -37,22 +69,14 @@ namespace ESchedule
                 BaseAddress = new Uri("https://localhost:7087/")
             });
 
-            builder.Services.AddTransient<IEmailService, EmailService>();
+            //builder.Services.AddScoped<ILogger>();
+            builder.Services.AddTransient<IEmailSender, EmailService>();
+            builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
             builder.Services.AddScoped<ILessonService, LessonService>();
-            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IClassService, ClassService>();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(option =>
-                {
-                    option.Cookie.HttpOnly = true;
-                    //option.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-                    option.SlidingExpiration = true;
-                    option.LoginPath = new PathString("/User/Login");
-                    option.AccessDeniedPath = new PathString("/User/NotHaveRights");
-                });
-
             builder.Services.AddSwaggerGen();
+            builder.Services.AddMemoryCache();
 
             var app = builder.Build();
 
@@ -70,6 +94,8 @@ namespace ESchedule
                 app.UseSwaggerUI();
             };
 
+            app.MapIdentityApi<ApplicationUser>();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -81,6 +107,8 @@ namespace ESchedule
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Schedule}/{action=Index}/{id?}"); //{controller=Home}/{action=Index}/{id?}
+
+            app.MapRazorPages();
 
             app.Run();
         }

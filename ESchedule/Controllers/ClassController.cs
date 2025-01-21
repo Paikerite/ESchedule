@@ -11,6 +11,7 @@ using ESchedule.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using ESchedule.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace ESchedule.Controllers
 {
@@ -18,14 +19,14 @@ namespace ESchedule.Controllers
     public class ClassController : Controller
     {
         private readonly IClassService classService;
-        private readonly IUserService userService;
+        private readonly UserManager<ApplicationUser> userManager;
         private readonly ILessonService lessonService;
 
-        public ClassController(IClassService classService, IUserService userService, ILessonService lessonService)
+        public ClassController(IClassService classService, ILessonService lessonService, UserManager<ApplicationUser> userManager)
         {
             this.classService = classService;
-            this.userService = userService;
             this.lessonService = lessonService;
+            this.userManager = userManager;
         }
 
         // GET: Class
@@ -114,7 +115,13 @@ namespace ESchedule.Controllers
 
                 if (Class != null)
                 {
-                    var currectUser = await userService.GetUserByEmail(joinClass.UserName);
+                    var currectUser = await userManager.FindByNameAsync(joinClass.UserName);
+                    if (currectUser is null)
+                    {
+                        ModelState.AddModelError("", "Не вдалося приєднати вас до класу");
+                        return View(joinClass);
+                    }
+
                     if (!Class.UsersAccount.Contains(currectUser))
                     {
                         await classService.AddUserToClassByCode(joinClass);
@@ -150,8 +157,14 @@ namespace ESchedule.Controllers
                 if (isExistClass == null)
                 {
                     var JoinClass = new JoinClassModel() { JoinCode = classViewModel.CodeToJoin, UserName = User.Identity.Name };
-                    var currectUser = await userService.GetUserByEmail(JoinClass.UserName);
-                    classViewModel.IdUserAdmin = currectUser.Id;
+                    //var currectUser = await userService.GetUserByEmail(JoinClass.UserName);
+                    var currectUserId = userManager.GetUserId(User);
+                    if (currectUserId is null)
+                    {
+                        ModelState.AddModelError("", "Не вдалося знайти вас Id");
+                        return View(classViewModel);
+                    }
+                    classViewModel.IdUserAdmin = int.Parse(currectUserId);
 
                     await classService.PostClass(classViewModel);
                     await classService.AddUserToClassByCode(JoinClass);

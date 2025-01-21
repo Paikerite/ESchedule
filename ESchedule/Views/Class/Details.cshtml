@@ -1,10 +1,10 @@
 ﻿@model ESchedule.Models.ClassViewModel
-@inject IUserService userService
+@inject UserManager<ApplicationUser> userManager
 
 @{
     ViewData["Title"] = "Курс";
-    var user = await userService.GetUserByEmail(User.Identity.Name);
-    var userCreator = await userService.GetUserById(Model.IdUserAdmin);
+    var user = await userManager.FindByNameAsync(User.Identity.Name);
+    var userCreator = await userManager.FindByIdAsync(Model.IdUserAdmin.ToString());
 }
 
 <div class="container">
@@ -40,14 +40,16 @@
                 <tbody>
                     @foreach (var item in Model.UsersAccount)
                     {
-                        <tr>
-                            <td>
-                                @item.SurName @item.Name @item.PatronymicName
-                            </td>
-                            <td>
-                                @item.Role.ToString()
-                            </td>
-                        </tr>
+                            <tr>
+                                <td>
+                                <a class="link-opacity-75-hover" asp-area="" asp-controller="Account" asp-action="Details" asp-route-id="@item.Id">
+                                        @item.SurName @item.Name @item.PatronymicName
+                                    </a>
+                                </td>
+                                <td>
+                                    @userManager.GetRolesAsync(item).Result.FirstOrDefault()
+                                </td>
+                            </tr>
                     }
                 </tbody>
             </table>

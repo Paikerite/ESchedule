@@ -9,6 +9,7 @@ namespace ESchedule.Models
         public int Id { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Необхідна назва урока")]
+        [MaxLength(256, ErrorMessage = "Максимальна кількість символів 256")]
         public string NameLesson { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Необхідний опис урока")]

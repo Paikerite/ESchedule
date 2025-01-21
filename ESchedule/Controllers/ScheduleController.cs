@@ -2,11 +2,8 @@
 using ESchedule.Models;
 using ESchedule.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Threading.Channels;
-using Microsoft.Extensions.Logging.EventSource;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+using ESchedule.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace ESchedule.Controllers
 {
@@ -14,21 +11,22 @@ namespace ESchedule.Controllers
     {
         private readonly ILessonService lessonService;
         private readonly IClassService classService;
-        private readonly IUserService userService;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public ScheduleController(ILessonService lessonService, IClassService classService, IUserService userService)
+        public ScheduleController(ILessonService lessonService, IClassService classService, UserManager<ApplicationUser> userManager)
         {
             this.lessonService = lessonService;
             this.classService = classService;
-            this.userService = userService;
+            this.userManager = userManager;
         }
 
         // GET: Schedule
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(IEnumerable<LessonViewModel> lessons)
         {
             var currectDate = DateTime.Now; //Normal date
 
-            var lessons = await lessonService.GetLessonsByDateAndName(currectDate, User.Identity.Name);
+            lessons = await lessonService.GetLessonsByDateAndName(currectDate, User.Identity.Name);
+
             ViewBag.Date = currectDate;
 
             if (lessons != null)
@@ -42,16 +40,34 @@ namespace ESchedule.Controllers
         }
 
         // POST: Schedule/{datebyuser}
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Index(DateTime datebyuser)
+        //{
+        //    var lessons = await lessonService.GetLessonsByDateAndName(datebyuser, User.Identity.Name);
+        //    ViewBag.Date = datebyuser;
+
+        //    if (lessons != null)
+        //    {
+        //        return View(lessons);
+        //    }
+        //    else
+        //    {
+        //        return Problem("Entity set 'EScheduleDbContext.Lessons' is null.");
+        //    }
+        //}
+
+        // POST: Schedule/{datebyuser}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(DateTime datebyuser)
+        public async Task<IActionResult> ChangeData(DateTime datebyuser)
         {
             var lessons = await lessonService.GetLessonsByDateAndName(datebyuser, User.Identity.Name);
             ViewBag.Date = datebyuser;
 
             if (lessons != null)
             {
-                return View(lessons);
+                return View("Index", lessons);
             }
             else
             {
@@ -131,7 +147,7 @@ namespace ESchedule.Controllers
         public async Task<IActionResult> Edit(int? id, string userName)
         {
 
-            var user = await userService.GetUserByEmail(userName);
+            var user = await userManager.FindByNameAsync(userName);
 
             if (user == null)
             {
